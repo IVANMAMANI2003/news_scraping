@@ -1,0 +1,278 @@
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * Delete the template below * * * * * * * * * -->
+<!-- * * * * * * * to get started with your project! * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+
+<style>
+  :host {
+    --bright-blue: oklch(51.01% 0.274 263.83);
+    --electric-violet: oklch(53.18% 0.28 296.97);
+    --french-violet: oklch(47.66% 0.246 305.88);
+    --vivid-pink: oklch(69.02% 0.277 332.77);
+    --hot-red: oklch(61.42% 0.238 15.34);
+    --orange-red: oklch(63.32% 0.24 31.68);
+
+    --gray-900: oklch(31.318% 0.00924 303.808);
+    --gray-700: oklch(44.829% 0.01501 300.863);
+    --gray-400: oklch(70.9% 0.015 304.04);
+
+    --red-to-pink-to-purple-vertical-gradient: linear-gradient(
+      180deg,
+      var(--orange-red) 0%,
+      var(--vivid-pink) 50%,
+      var(--electric-violet) 100%
+    );
+
+    --red-to-pink-to-purple-horizontal-gradient: linear-gradient(
+      90deg,
+      var(--orange-red) 0%,
+      var(--vivid-pink) 50%,
+      var(--electric-violet) 100%
+    );
+
+    --pill-accent: var(--bright-blue);
+
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol";
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    font-size: 3.125rem;
+    color: var(--gray-900);
+    font-weight: 500;
+    line-height: 100%;
+    letter-spacing: -0.125rem;
+    margin: 0;
+    font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol";
+  }
+
+  p {
+    margin: 0;
+    color: var(--gray-700);
+  }
+
+  main {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    box-sizing: inherit;
+    position: relative;
+  }
+
+  .angular-logo {
+    max-width: 9.2rem;
+  }
+
+  .content {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 3rem;
+  }
+
+  .content h1 {
+    margin-top: 1.75rem;
+  }
+
+  .content p {
+    margin-top: 1.5rem;
+  }
+
+  .divider {
+    width: 1px;
+    background: var(--red-to-pink-to-purple-vertical-gradient);
+    margin-inline: 0.5rem;
+  }
+
+  .pill-group {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+
+  .pill {
+    display: flex;
+    align-items: center;
+    --pill-accent: var(--bright-blue);
+    background: color-mix(in srgb, var(--pill-accent) 5%, transparent);
+    color: var(--pill-accent);
+    padding-inline: 0.75rem;
+    padding-block: 0.375rem;
+    border-radius: 2.75rem;
+    border: 0;
+    transition: background 0.3s ease;
+    font-family: var(--inter-font);
+    font-size: 0.875rem;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.4rem;
+    letter-spacing: -0.00875rem;
+    text-decoration: none;
+  }
+
+  .pill:hover {
+    background: color-mix(in srgb, var(--pill-accent) 15%, transparent);
+  }
+
+  .pill-group .pill:nth-child(6n + 1) {
+    --pill-accent: var(--bright-blue);
+  }
+  .pill-group .pill:nth-child(6n + 2) {
+    --pill-accent: var(--french-violet);
+  }
+  .pill-group .pill:nth-child(6n + 3),
+  .pill-group .pill:nth-child(6n + 4),
+  .pill-group .pill:nth-child(6n + 5) {
+    --pill-accent: var(--hot-red);
+  }
+
+  .pill-group svg {
+    margin-inline-start: 0.25rem;
+  }
+
+  .social-links {
+    display: flex;
+    align-items: center;
+    gap: 0.73rem;
+    margin-top: 1.5rem;
+  }
+
+  .social-links path {
+    transition: fill 0.3s ease;
+    fill: var(--gray-400);
+  }
+
+  .social-links a:hover svg path {
+    fill: var(--gray-900);
+  }
+
+  @media screen and (max-width: 650px) {
+    .content {
+      flex-direction: column;
+      width: max-content;
+    }
+
+    .divider {
+      height: 1px;
+      width: 100%;
+      background: var(--red-to-pink-to-purple-horizontal-gradient);
+      margin-block: 1.5rem;
+    }
+  }
+</style>
+
+
+
+<!-- BizNews Shell Start -->
+<div class="container-fluid d-none d-lg-block">
+	<div class="row align-items-center bg-dark px-lg-5">
+		<div class="col-lg-9">
+			<nav class="navbar navbar-expand-sm bg-dark p-0">
+				<ul class="navbar-nav ml-n2">
+					<li class="nav-item border-right border-secondary">
+						<a class="nav-link text-body small" href="#">Bienvenido</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+		<div class="col-lg-3 text-right d-none d-md-block">
+			<nav class="navbar navbar-expand-sm bg-dark p-0">
+				<ul class="navbar-nav ml-auto mr-n2">
+					<li class="nav-item"><a class="nav-link text-body" href="#"><small class="fab fa-twitter"></small></a></li>
+					<li class="nav-item"><a class="nav-link text-body" href="#"><small class="fab fa-facebook-f"></small></a></li>
+					<li class="nav-item"><a class="nav-link text-body" href="#"><small class="fab fa-linkedin-in"></small></a></li>
+					<li class="nav-item"><a class="nav-link text-body" href="#"><small class="fab fa-instagram"></small></a></li>
+				</ul>
+			</nav>
+    </div>
+      </div>
+	<div class="row align-items-center bg-white py-3 px-lg-5">
+		<div class="col-lg-4">
+			<a routerLink="/" class="navbar-brand p-0 d-none d-lg-block">
+				<h1 class="m-0 display-4 text-uppercase text-primary">Biz<span class="text-secondary font-weight-normal">News</span></h1>
+        </a>
+      </div>
+		<div class="col-lg-8 text-center text-lg-right">
+			<img class="img-fluid" src="assets/biznews/img/ads-728x90.png" alt="">
+		</div>
+    </div>
+  </div>
+
+<div class="container-fluid p-0">
+	<nav class="navbar navbar-expand-lg bg-dark navbar-dark py-2 py-lg-0 px-lg-5">
+		<a routerLink="/" class="navbar-brand d-block d-lg-none">
+			<h1 class="m-0 display-4 text-uppercase text-primary">Biz<span class="text-white font-weight-normal">News</span></h1>
+		</a>
+		<button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse justify-content-between px-0 px-lg-3" id="navbarCollapse">
+			<div class="navbar-nav mr-auto py-0">
+				<a routerLink="/" class="nav-item nav-link">Home</a>
+				<div class="nav-item dropdown" *ngIf="fuentes.length">
+					<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Fuentes</a>
+					<div class="dropdown-menu rounded-0 m-0">
+						<a *ngFor="let f of fuentes" class="dropdown-item" [routerLink]="['/category']" [queryParams]="{fuente: f}">{{ f }}</a>
+					</div>
+				</div>
+				<div class="nav-item dropdown" *ngIf="fuentes.length">
+					<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Categorías</a>
+					<div class="dropdown-menu rounded-0 m-0">
+						<ng-container *ngFor="let f of fuentes">
+							<h6 class="dropdown-header">{{ f }}</h6>
+							<a *ngFor="let c of categoriasPorFuente[f]" class="dropdown-item" [routerLink]="['/category']" [queryParams]="{fuente: f, categoria: c}">{{ c }}</a>
+							<div class="dropdown-divider"></div>
+						</ng-container>
+					</div>
+				</div>
+			</div>
+			<div class="input-group ml-auto d-none d-lg-flex" style="width: 100%; max-width: 300px;">
+				<input type="text" class="form-control border-0" placeholder="Keyword">
+				<div class="input-group-append">
+					<button class="input-group-text bg-primary text-dark border-0 px-3"><i class="fa fa-search"></i></button>
+				</div>
+			</div>
+		</div>
+	</nav>
+</div>
+
+<div class="container-fluid">
+	<div class="container py-4">
+		<router-outlet></router-outlet>
+	</div>
+</div>
+
+<div class="container-fluid bg-dark pt-5 px-sm-3 px-md-5 mt-5">
+	<div class="row py-4">
+		<div class="col-lg-3 col-md-6 mb-5">
+			<h5 class="mb-4 text-white text-uppercase font-weight-bold">Get In Touch</h5>
+			<p class="font-weight-medium"><i class="fa fa-map-marker-alt mr-2"></i>123 Street, New York, USA</p>
+			<p class="font-weight-medium"><i class="fa fa-phone-alt mr-2"></i>+012 345 67890</p>
+			<p class="font-weight-medium"><i class="fa fa-envelope mr-2"></i>info&#64;example.com</p>
+			<h6 class="mt-4 mb-3 text-white text-uppercase font-weight-bold">Follow Us</h6>
+			<div class="d-flex justify-content-start">
+				<a class="btn btn-lg btn-secondary btn-lg-square mr-2" href="#"><i class="fab fa-twitter"></i></a>
+				<a class="btn btn-lg btn-secondary btn-lg-square mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
+				<a class="btn btn-lg btn-secondary btn-lg-square mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
+				<a class="btn btn-lg btn-secondary btn-lg-square" href="#"><i class="fab fa-instagram"></i></a>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- BizNews Shell End -->

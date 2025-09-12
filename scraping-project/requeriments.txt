@@ -1,0 +1,19 @@
+# Scraping
+scrapy==2.11.0
+beautifulsoup4==4.12.3
+requests==2.31.0
+lxml==5.2.2
+
+# Manejo de datos
+pandas==2.2.2
+
+# Almacenamiento en PostgreSQL
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.29
+
+# Programación de tareas
+schedule==1.2.1
+
+# Extras útiles
+tqdm==4.66.4         # barra de progreso
+python-dotenv==1.0.1 # variables de entorno

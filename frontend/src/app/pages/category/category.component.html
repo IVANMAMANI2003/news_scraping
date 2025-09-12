@@ -1,0 +1,22 @@
+<section>
+	<h2 class="text-xl font-bold mb-4">{{ fuente || 'Todas' }}<span *ngIf="categoria"> - {{ categoria }}</span></h2>
+	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+		@for (n of news; track n.id) {
+			<article class="bg-white rounded shadow overflow-hidden">
+				<ng-container [ngSwitch]="parseImages(n).length">
+					<img *ngSwitchCase="0" class="w-full h-48 object-cover" src="assets/placeholder.jpg" alt="" />
+					<div *ngSwitchDefault class="w-full h-48 overflow-hidden">
+						<a *ngFor="let img of parseImages(n); index as i" [href]="img" target="_blank" rel="noopener" class="inline-block w-full h-48">
+							<img class="w-full h-48 object-cover" [src]="img" [alt]="n.titulo || 'Imagen ' + (i+1)" />
+						</a>
+					</div>
+				</ng-container>
+				<div class="p-4">
+					<div class="text-sm text-blue-600 font-semibold">{{ n.fuente || 'Otros' }}<span class="text-gray-400"> · </span>{{ n.categoria || 'General' }}</div>
+					<h3 class="mt-1 text-lg font-semibold line-clamp-2"><a [routerLink]="['/single', n.id]">{{ n.titulo || 'Sin título' }}</a></h3>
+					<p class="mt-2 text-sm text-gray-600 line-clamp-3">{{ n.resumen || n.contenido }}</p>
+				</div>
+			</article>
+		}
+	</div>
+</section>
