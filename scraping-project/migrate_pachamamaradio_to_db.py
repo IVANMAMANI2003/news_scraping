@@ -110,13 +110,14 @@ def migrate_from_csv(csv_file, conn):
                 )
                 
                 cursor.execute(insert_query, values)
+                conn.commit()  # Commit después de cada registro exitoso
                 migrated_count += 1
                 
             except Exception as e:
                 print(f"⚠️  Error en registro {index}: {e}")
+                conn.rollback()  # Rollback en caso de error
                 continue
         
-        conn.commit()
         cursor.close()
         
         print(f"✅ Migración CSV completada:")

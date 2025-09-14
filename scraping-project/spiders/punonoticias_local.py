@@ -156,9 +156,19 @@ class PunoNoticiasLocalScraper:
         
         # Extraer datos
         article_data = {
+            'titulo': None,
+            'fecha': None,
+            'hora': None,
+            'resumen': None,
+            'contenido': None,
+            'categoria': None,
+            'autor': None,
+            'tags': None,
             'url': url,
             'fecha_extraccion': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            'fuente': 'Puno Noticias'
+            'imagenes': None,
+            'fuente': 'Puno Noticias',
+            'created_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
         # Título
@@ -172,7 +182,6 @@ class PunoNoticiasLocalScraper:
             'title'
         ]
         
-        article_data['titulo'] = None
         for selector in title_selectors:
             title_elem = soup.select_one(selector)
             if title_elem:
@@ -195,8 +204,6 @@ class PunoNoticiasLocalScraper:
             '.entry-meta'
         ]
         
-        article_data['fecha'] = None
-        article_data['hora'] = None
         
         for selector in date_selectors:
             date_elem = soup.select_one(selector)
@@ -220,7 +227,6 @@ class PunoNoticiasLocalScraper:
             'article'
         ]
         
-        article_data['contenido'] = None
         for selector in content_selectors:
             content_elem = soup.select_one(selector)
             if content_elem:
@@ -232,7 +238,6 @@ class PunoNoticiasLocalScraper:
         
         # Resumen (primeros 200 caracteres del contenido si no hay excerpt)
         excerpt_selectors = ['.entry-summary', '.post-excerpt', '.excerpt']
-        article_data['resumen'] = None
         
         for selector in excerpt_selectors:
             excerpt_elem = soup.select_one(selector)
@@ -268,7 +273,6 @@ class PunoNoticiasLocalScraper:
             '.author-name'
         ]
         
-        article_data['autor'] = None
         for selector in author_selectors:
             author_elem = soup.select_one(selector)
             if author_elem:
@@ -306,9 +310,32 @@ class PunoNoticiasLocalScraper:
             for img in img_elems:
                 src = img.get('src') or img.get('data-src')
                 if src:
+                    # Filtrar imágenes muy pequeñas o de interface
+                    width = img.get('width')
+                    height = img.get('height')
+                    
+                    if width and height:
+                        try:
+                            w, h = int(width), int(height)
+                            if w < 100 or h < 100:  # Muy pequeñas, probablemente iconos
+                                continue
+                        except ValueError:
+                            pass
+                    
+                    # Filtrar por nombre de archivo
+                    if any(skip in src.lower() for skip in ['icon', 'logo', 'avatar', 'button', 'banner']):
+                        continue
+                    
                     full_img_url = urljoin(url, src)
                     if full_img_url not in images:
                         images.append(full_img_url)
+                        
+                        # Limitar a máximo 2 imágenes
+                        if len(images) >= 2:
+                            break
+            
+            if len(images) >= 2:
+                break
         
         article_data['imagenes'] = ', '.join(images) if images else None
         
@@ -419,6 +446,23 @@ def main():
     else:
         print("❌ No se pudieron extraer noticias")
         return None, None
+
+    def save_to_files(self, articles, csv_file, json_file):
+        """Guardar artículos en archivos CSV y JSON"""
+        import json
+
+        import pandas as pd
+
+        # Asegurar que el directorio existe
+        os.makedirs(os.path.dirname(csv_file), exist_ok=True)
+        
+        # Guardar CSV
+        df = pd.DataFrame(articles)
+        df.to_csv(csv_file, index=False, encoding='utf-8')
+        
+        # Guardar JSON
+        with open(json_file, 'w', encoding='utf-8') as f:
+            json.dump(articles, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
     main()

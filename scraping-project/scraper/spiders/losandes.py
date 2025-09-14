@@ -154,7 +154,8 @@ class LosAndesScraper:
                 'autor': '',
                 'tags': '',
                 'link_imagenes': '',
-                'fecha_extraccion': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                'fecha_extraccion': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'fuente': 'Los Andes'
             }
             
             # Extraer título

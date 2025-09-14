@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Reportes y Estadísticas - BizNews</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Free HTML Templates" name="keywords">
+    <meta content="Free HTML Templates" name="description">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">  
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+    
+    <!-- Reportes CSS -->
+    <link href="css/reportes.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Topbar Start -->
+    <div class="container-fluid d-none d-lg-block">
+        <div class="row align-items-center bg-dark px-lg-5">
+            <div class="col-lg-9">
+                <nav class="navbar navbar-expand-sm bg-dark p-0">
+                    <ul class="navbar-nav ml-n2">
+                        <li class="nav-item border-right border-secondary">
+                            <a class="nav-link text-body small" href="#">Monday, January 1, 2045</a>
+                        </li>
+                        <li class="nav-item border-right border-secondary">
+                            <a class="nav-link text-body small" href="#">Advertise</a>
+                        </li>
+                        <li class="nav-item border-right border-secondary">
+                            <a class="nav-link text-body small" href="#">Contact</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-body small" href="#">Login</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="col-lg-3 text-right d-none d-md-block">
+                <nav class="navbar navbar-expand-sm bg-dark p-0">
+                    <ul class="navbar-nav ml-auto mr-n2">
+                        <li class="nav-item">
+                            <a class="nav-link text-body" href="#"><small class="fab fa-twitter"></small></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-body" href="#"><small class="fab fa-facebook-f"></small></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-body" href="#"><small class="fab fa-linkedin-in"></small></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-body" href="#"><small class="fab fa-instagram"></small></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-body" href="#"><small class="fab fa-google-plus-g"></small></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-body" href="#"><small class="fab fa-youtube"></small></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="row align-items-center bg-white py-3 px-lg-5">
+            <div class="col-lg-4">
+                <a href="index.html" class="navbar-brand p-0 d-none d-lg-block">
+                    <h1 class="m-0 display-4 text-uppercase text-primary">Biz<span class="text-secondary font-weight-normal">News</span></h1>
+                </a>
+            </div>
+            <div class="col-lg-8 text-center text-lg-right">
+                <div class="bg-primary text-white p-3 rounded">
+                    <h5 class="mb-0">BizNews - Reportes y Estadísticas</h5>
+                    <small>Análisis de datos en tiempo real</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+
+
+    <!-- Navbar Start -->
+    <div class="container-fluid p-0">
+        <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-2 py-lg-0 px-lg-5">
+            <a href="index.html" class="navbar-brand d-block d-lg-none">
+                <h1 class="m-0 display-4 text-uppercase text-primary">Biz<span class="text-secondary font-weight-normal">News</span></h1>
+            </a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-between px-0 px-lg-3" id="navbarCollapse">
+                <div class="navbar-nav mr-auto py-0">
+                    <a href="index.html" class="nav-item nav-link">Portada</a>
+                    <a href="fuentes.html" class="nav-item nav-link">Fuentes</a>
+                    <a href="categorias.html" class="nav-item nav-link">Categorías</a>
+                    <a href="reportes.html" class="nav-item nav-link active">Reportes</a>
+                    <a href="contact.html" class="nav-item nav-link">Contacto</a>
+                </div>
+                <div class="input-group ml-auto d-none d-lg-flex" style="width: 100%; max-width: 300px;">
+                    <input type="text" class="form-control border-0" placeholder="Palabra clave">
+                    <div class="input-group-append">
+                        <button class="input-group-text bg-primary text-dark border-0 px-3">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <!-- Navbar End -->
+
+
+    <!-- Breaking News Start -->
+    <div class="container-fluid mt-5 pt-3">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between flex-column flex-md-row align-items-center">
+                        <div class="mb-3 mb-md-0">
+                            <h4 class="m-0 text-uppercase font-weight-bold">Reportes y Estadísticas</h4>
+                        </div>
+                        <div class="d-flex">
+                            <small class="mr-2 text-muted"><i class="fa fa-calendar mr-1"></i>Actualizado: <span id="last-update"></span></small>
+                            <button class="btn btn-sm btn-outline-primary ml-3" onclick="refreshReportes()">
+                                <i class="fa fa-refresh mr-1"></i>Actualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Breaking News End -->
+
+
+    <!-- Reportes Section Start -->
+    <div class="container-fluid mt-5 pt-3">
+        <div class="container">
+            <div class="row">
+                <!-- Gráfica 1: Noticias por Fuente -->
+                <div class="col-lg-6 mb-4">
+                    <div class="bg-white border p-4">
+                        <h5 class="mb-3 text-uppercase font-weight-bold">Noticias por Fuente</h5>
+                        <div class="chart-container">
+                            <canvas id="fuentesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfica 2: Noticias por Categoría -->
+                <div class="col-lg-6 mb-4">
+                    <div class="bg-white border p-4">
+                        <h5 class="mb-3 text-uppercase font-weight-bold">Noticias por Categoría</h5>
+                        <div class="chart-container">
+                            <canvas id="categoriasChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfica 3: Noticias por Mes -->
+                <div class="col-lg-6 mb-4">
+                    <div class="bg-white border p-4">
+                        <h5 class="mb-3 text-uppercase font-weight-bold">Noticias por Mes</h5>
+                        <div class="chart-container">
+                            <canvas id="mensualChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfica 4: Noticias por Día de la Semana -->
+                <div class="col-lg-6 mb-4">
+                    <div class="bg-white border p-4">
+                        <h5 class="mb-3 text-uppercase font-weight-bold">Noticias por Día de la Semana</h5>
+                        <div class="chart-container">
+                            <canvas id="diasChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfica 5: Top 10 Noticias Más Leídas -->
+                <div class="col-lg-12 mb-4">
+                    <div class="bg-white border p-4">
+                        <h5 class="mb-3 text-uppercase font-weight-bold">Top 10 Noticias Más Leídas</h5>
+                        <div class="chart-container-large">
+                            <canvas id="topNewsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen Estadístico -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="bg-white border p-4">
+                        <h5 class="mb-3 text-uppercase font-weight-bold">Resumen Estadístico</h5>
+                        <div class="row" id="stats-summary">
+                            <div class="col-md-3 text-center mb-3">
+                                <div class="bg-primary text-white p-3 rounded">
+                                    <h3 class="mb-0" id="total-news">0</h3>
+                                    <small>Total Noticias</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center mb-3">
+                                <div class="bg-success text-white p-3 rounded">
+                                    <h3 class="mb-0" id="total-fuentes">0</h3>
+                                    <small>Fuentes</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center mb-3">
+                                <div class="bg-info text-white p-3 rounded">
+                                    <h3 class="mb-0" id="total-categorias">0</h3>
+                                    <small>Categorías</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center mb-3">
+                                <div class="bg-warning text-white p-3 rounded">
+                                    <h3 class="mb-0" id="avg-per-day">0</h3>
+                                    <small>Promedio/Día</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Reportes Section End -->
+
+
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark pt-5 px-sm-3 px-md-5 mt-5">
+        <div class="row py-4">
+            <div class="col-lg-3 col-md-6 mb-5">
+                <h4 class="text-uppercase text-light mb-4">Get In Touch</h4>
+                <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>123 Street, New York, USA</p>
+                <p class="mb-2"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
+                <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
+                <h6 class="text-uppercase text-light mt-4 mb-3">Follow Us</h6>
+                <div class="d-flex justify-content-start">
+                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-twitter"></i></a>
+                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-instagram"></i></a>
+                    <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-5">
+                <h4 class="text-uppercase text-light mb-4">Quick Links</h4>
+                <div class="d-flex flex-column justify-content-start">
+                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>About Us</a>
+                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>Contact Us</a>
+                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>Our Services</a>
+                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>Terms & Condition</a>
+                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>Support</a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-5">
+                <h4 class="text-uppercase text-light mb-4">Newsletter</h4>
+                <p class="mb-4">Voluptua stet stet kasd, sit sea et sit lorem. Diam lorem sed et dolores.</p>
+                <div class="w-100 mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control border-light" style="padding: 25px;" placeholder="Your Email">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary px-3">Sign Up</button>
+                        </div>
+                    </div>
+                </div>
+                <i>Lorem sit amet elit. Sed, cursus a nibh.</i>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-5">
+                <h4 class="text-uppercase text-light mb-4">Gallery</h4>
+                <div class="row mx-n1">
+                    <div class="col-4 px-1 mb-3">
+                        <a href=""><img class="w-100" src="img/news-110x110-1.jpg" alt=""></a>
+                    </div>
+                    <div class="col-4 px-1 mb-3">
+                        <a href=""><img class="w-100" src="img/news-110x110-2.jpg" alt=""></a>
+                    </div>
+                    <div class="col-4 px-1 mb-3">
+                        <a href=""><img class="w-100" src="img/news-110x110-3.jpg" alt=""></a>
+                    </div>
+                    <div class="col-4 px-1 mb-3">
+                        <a href=""><img class="w-100" src="img/news-110x110-4.jpg" alt=""></a>
+                    </div>
+                    <div class="col-4 px-1 mb-3">
+                        <a href=""><img class="w-100" src="img/news-110x110-5.jpg" alt=""></a>
+                    </div>
+                    <div class="col-4 px-1 mb-3">
+                        <a href=""><img class="w-100" src="img/news-110x110-1.jpg" alt=""></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid py-4 px-sm-3 px-md-5" style="background: #111111;">
+        <p class="m-0 text-center">&copy; <a href="#">Your Site Name</a>. All Rights Reserved. 
+            <a href="https://htmlcodex.com">HTML Codex</a> Distributed By <a href="https://themewagon.com">ThemeWagon</a>
+        </p>
+    </div>
+    <!-- Footer End -->
+
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-primary btn-square back-to-top"><i class="fa fa-arrow-up"></i></a>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+    
+    <!-- Reportes JavaScript -->
+    <script src="js/reportes.js"></script>
+</body>
+
+</html>

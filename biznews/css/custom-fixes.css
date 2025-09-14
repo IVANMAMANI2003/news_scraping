@@ -1,0 +1,44 @@
+/* Fixes para el texto desbordado en Trending News */
+#trending-news-container .d-flex {
+    overflow: hidden;
+}
+
+#trending-news-container .d-flex img {
+    flex-shrink: 0;
+    width: 110px !important;
+    height: 110px !important;
+    object-fit: cover;
+}
+
+#trending-news-container .d-flex > div:last-child {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+#trending-news-container .h6 {
+    line-height: 1.2 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+/* Asegurar que el contenedor tenga altura fija */
+#trending-news-container .d-flex {
+    height: 110px !important;
+    max-height: 110px !important;
+}
+
+/* Mejorar el espaciado */
+#trending-news-container .mb-3 {
+    margin-bottom: 0.75rem !important;
+}
+
+#trending-news-container .mb-3:last-child {
+    margin-bottom: 0 !important;
+}

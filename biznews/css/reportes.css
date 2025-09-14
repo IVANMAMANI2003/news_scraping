@@ -1,0 +1,58 @@
+/* Estilos específicos para la página de reportes */
+
+/* Contenedores de gráficas con altura fija */
+.chart-container {
+    height: 300px;
+    width: 100%;
+    position: relative;
+}
+
+/* Gráfica de top noticias más alta */
+.chart-container-large {
+    height: 400px;
+    width: 100%;
+    position: relative;
+}
+
+/* Asegurar que los canvas mantengan su tamaño */
+canvas {
+    max-height: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Contenedores de gráficas específicos */
+#fuentesChart {
+    max-height: 300px;
+}
+
+#categoriasChart {
+    max-height: 300px;
+}
+
+#mensualChart {
+    max-height: 300px;
+}
+
+#diasChart {
+    max-height: 300px;
+}
+
+#topNewsChart {
+    max-height: 400px;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 250px;
+    }
+    
+    .chart-container-large {
+        height: 300px;
+    }
+}
+
+/* Asegurar que las gráficas no se desborden */
+.bg-white.border {
+    overflow: hidden;
+}

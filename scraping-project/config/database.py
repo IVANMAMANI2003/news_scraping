@@ -10,9 +10,14 @@ DATABASE_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'database': os.getenv('DB_NAME', 'noticias'),
     'user': os.getenv('DB_USER', 'postgres'),
-    'password': os.getenv('DB_PASSWORD', 'postgres'),
+    'password': os.getenv('DB_PASSWORD', '123456'),
     'port': os.getenv('DB_PORT', '5432')
 }
+
+def get_db_connection():
+    """Obtener conexión a la base de datos"""
+    import psycopg2
+    return psycopg2.connect(**DATABASE_CONFIG)
 
 # Configuración de Scrapy
 SCRAPY_SETTINGS = {

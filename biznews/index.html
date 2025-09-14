@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>BizNews - Free News Website Template</title>
+    <title>BizNews</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="Free HTML Templates" name="keywords">
     <meta content="Free HTML Templates" name="description">
@@ -23,6 +23,7 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+    <link href="css/custom-fixes.css" rel="stylesheet">
 </head>
 
 <body>
@@ -97,18 +98,11 @@
             </button>
             <div class="collapse navbar-collapse justify-content-between px-0 px-lg-3" id="navbarCollapse">
                 <div class="navbar-nav mr-auto py-0">
-                    <a href="index.html" class="nav-item nav-link active">Home</a>
-                    <a href="category.html" class="nav-item nav-link">Category</a>
-                    <a href="single.html" class="nav-item nav-link">Single News</a>
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Dropdown</a>
-                        <div class="dropdown-menu rounded-0 m-0">
-                            <a href="#" class="dropdown-item">Menu item 1</a>
-                            <a href="#" class="dropdown-item">Menu item 2</a>
-                            <a href="#" class="dropdown-item">Menu item 3</a>
-                        </div>
-                    </div>
-                    <a href="contact.html" class="nav-item nav-link">Contact</a>
+                    <a href="index.html" class="nav-item nav-link active">Portada</a>
+                    <a href="fuentes.html" class="nav-item nav-link">Fuentes</a>
+                    <a href="categorias.html" class="nav-item nav-link">Categorías</a>
+                    <a href="reportes.html" class="nav-item nav-link">Reportes</a>
+                    <a href="contact.html" class="nav-item nav-link">Contacto</a>
                 </div>
                 <div class="input-group ml-auto d-none d-lg-flex" style="width: 100%; max-width: 300px;">
                     <input type="text" class="form-control border-0" placeholder="Keyword">
@@ -164,59 +158,8 @@
                 </div>
             </div>
             <div class="col-lg-5 px-0">
-                <div class="row mx-0">
-                    <div class="col-md-6 px-0">
-                        <div class="position-relative overflow-hidden" style="height: 250px;">
-                            <img class="img-fluid w-100 h-100" src="img/news-700x435-1.jpg" style="object-fit: cover;">
-                            <div class="overlay">
-                                <div class="mb-2">
-                                    <a class="badge badge-primary text-uppercase font-weight-semi-bold p-2 mr-2"
-                                        href="">Business</a>
-                                    <a class="text-white" href=""><small>Jan 01, 2045</small></a>
-                                </div>
-                                <a class="h6 m-0 text-white text-uppercase font-weight-semi-bold" href="">Lorem ipsum dolor sit amet elit...</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 px-0">
-                        <div class="position-relative overflow-hidden" style="height: 250px;">
-                            <img class="img-fluid w-100 h-100" src="img/news-700x435-2.jpg" style="object-fit: cover;">
-                            <div class="overlay">
-                                <div class="mb-2">
-                                    <a class="badge badge-primary text-uppercase font-weight-semi-bold p-2 mr-2"
-                                        href="">Business</a>
-                                    <a class="text-white" href=""><small>Jan 01, 2045</small></a>
-                                </div>
-                                <a class="h6 m-0 text-white text-uppercase font-weight-semi-bold" href="">Lorem ipsum dolor sit amet elit...</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 px-0">
-                        <div class="position-relative overflow-hidden" style="height: 250px;">
-                            <img class="img-fluid w-100 h-100" src="img/news-700x435-3.jpg" style="object-fit: cover;">
-                            <div class="overlay">
-                                <div class="mb-2">
-                                    <a class="badge badge-primary text-uppercase font-weight-semi-bold p-2 mr-2"
-                                        href="">Business</a>
-                                    <a class="text-white" href=""><small>Jan 01, 2045</small></a>
-                                </div>
-                                <a class="h6 m-0 text-white text-uppercase font-weight-semi-bold" href="">Lorem ipsum dolor sit amet elit...</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 px-0">
-                        <div class="position-relative overflow-hidden" style="height: 250px;">
-                            <img class="img-fluid w-100 h-100" src="img/news-700x435-4.jpg" style="object-fit: cover;">
-                            <div class="overlay">
-                                <div class="mb-2">
-                                    <a class="badge badge-primary text-uppercase font-weight-semi-bold p-2 mr-2"
-                                        href="">Business</a>
-                                    <a class="text-white" href=""><small>Jan 01, 2045</small></a>
-                                </div>
-                                <a class="h6 m-0 text-white text-uppercase font-weight-semi-bold" href="">Lorem ipsum dolor sit amet elit...</a>
-                            </div>
-                        </div>
-                    </div>
+                <div class="row mx-0" id="small-news-container">
+                    <!-- Las 4 noticias pequeñas se cargarán dinámicamente aquí -->
                 </div>
             </div>
         </div>
@@ -595,59 +538,10 @@
                     <!-- Popular News Start -->
                     <div class="mb-3">
                         <div class="section-title mb-0">
-                            <h4 class="m-0 text-uppercase font-weight-bold">Tranding News</h4>
+                            <h4 class="m-0 text-uppercase font-weight-bold">Trending News</h4>
                         </div>
-                        <div class="bg-white border border-top-0 p-3">
-                            <div class="d-flex align-items-center bg-white mb-3" style="height: 110px;">
-                                <img class="img-fluid" src="img/news-110x110-1.jpg" alt="">
-                                <div class="w-100 h-100 px-3 d-flex flex-column justify-content-center border border-left-0">
-                                    <div class="mb-2">
-                                        <a class="badge badge-primary text-uppercase font-weight-semi-bold p-1 mr-2" href="">Business</a>
-                                        <a class="text-body" href=""><small>Jan 01, 2045</small></a>
-                                    </div>
-                                    <a class="h6 m-0 text-secondary text-uppercase font-weight-bold" href="">Lorem ipsum dolor sit amet elit...</a>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center bg-white mb-3" style="height: 110px;">
-                                <img class="img-fluid" src="img/news-110x110-2.jpg" alt="">
-                                <div class="w-100 h-100 px-3 d-flex flex-column justify-content-center border border-left-0">
-                                    <div class="mb-2">
-                                        <a class="badge badge-primary text-uppercase font-weight-semi-bold p-1 mr-2" href="">Business</a>
-                                        <a class="text-body" href=""><small>Jan 01, 2045</small></a>
-                                    </div>
-                                    <a class="h6 m-0 text-secondary text-uppercase font-weight-bold" href="">Lorem ipsum dolor sit amet elit...</a>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center bg-white mb-3" style="height: 110px;">
-                                <img class="img-fluid" src="img/news-110x110-3.jpg" alt="">
-                                <div class="w-100 h-100 px-3 d-flex flex-column justify-content-center border border-left-0">
-                                    <div class="mb-2">
-                                        <a class="badge badge-primary text-uppercase font-weight-semi-bold p-1 mr-2" href="">Business</a>
-                                        <a class="text-body" href=""><small>Jan 01, 2045</small></a>
-                                    </div>
-                                    <a class="h6 m-0 text-secondary text-uppercase font-weight-bold" href="">Lorem ipsum dolor sit amet elit...</a>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center bg-white mb-3" style="height: 110px;">
-                                <img class="img-fluid" src="img/news-110x110-4.jpg" alt="">
-                                <div class="w-100 h-100 px-3 d-flex flex-column justify-content-center border border-left-0">
-                                    <div class="mb-2">
-                                        <a class="badge badge-primary text-uppercase font-weight-semi-bold p-1 mr-2" href="">Business</a>
-                                        <a class="text-body" href=""><small>Jan 01, 2045</small></a>
-                                    </div>
-                                    <a class="h6 m-0 text-secondary text-uppercase font-weight-bold" href="">Lorem ipsum dolor sit amet elit...</a>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center bg-white mb-3" style="height: 110px;">
-                                <img class="img-fluid" src="img/news-110x110-5.jpg" alt="">
-                                <div class="w-100 h-100 px-3 d-flex flex-column justify-content-center border border-left-0">
-                                    <div class="mb-2">
-                                        <a class="badge badge-primary text-uppercase font-weight-semi-bold p-1 mr-2" href="">Business</a>
-                                        <a class="text-body" href=""><small>Jan 01, 2045</small></a>
-                                    </div>
-                                    <a class="h6 m-0 text-secondary text-uppercase font-weight-bold" href="">Lorem ipsum dolor sit amet elit...</a>
-                                </div>
-                            </div>
+                        <div class="bg-white border border-top-0 p-3" id="trending-news-container">
+                            <!-- Las noticias trending se cargarán dinámicamente aquí -->
                         </div>
                     </div>
                     <!-- Popular News End -->

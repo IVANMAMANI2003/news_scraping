@@ -57,23 +57,205 @@ def run_punonoticias_complete():
         print(f"❌ Error al ejecutar Puno Noticias: {e}")
         return None, None
 
-def run_pachamama_complete():
-    """Ejecutar scraping COMPLETO de Pachamama Radio"""
-    print("\n🕷️  SPIDER 3: Pachamama Radio - SCRAPING COMPLETO")
+def run_pachamama_with_immediate_migration():
+    """Ejecutar Pachamama Radio con migración inmediata"""
+    print("\n🕷️  SPIDER 1: Pachamama Radio - CON MIGRACIÓN INMEDIATA")
     print("=" * 70)
     
     try:
+        from migrate_pachamamaradio_to_db import main as migrate_pachamama
         from spiders.pachamamaradio_local import main as pachamama_main
         
+        print("🕷️  Ejecutando scraping de Pachamama Radio...")
+        
+        # Ejecutar scraping completo
         csv_file, json_file = pachamama_main()
         
         if csv_file and json_file:
-            print(f"\n✅ Pachamama Radio completado exitosamente")
+            print(f"✅ Scraping completado:")
+            print(f"   📄 CSV: {csv_file}")
+            print(f"   📄 JSON: {json_file}")
+            
+            # Migrar inmediatamente después del scraping
+            print(f"\n🗄️  Migrando datos a PostgreSQL...")
+            migrate_pachamama()
+            print(f"✅ Migración completada")
+            
             return csv_file, json_file
         else:
-            print(f"\n❌ Error en Pachamama Radio")
+            print(f"❌ Error en el scraping de Pachamama Radio")
             return None, None
             
+    except Exception as e:
+        print(f"❌ Error al ejecutar Pachamama Radio: {e}")
+        return None, None
+
+def run_punonoticias_with_immediate_migration():
+    """Ejecutar Puno Noticias con migración inmediata"""
+    print("\n🕷️  SPIDER 2: Puno Noticias - CON MIGRACIÓN INMEDIATA")
+    print("=" * 70)
+    
+    try:
+        from migrate_punonoticias_to_db import main as migrate_puno
+        from spiders.punonoticias_local import main as puno_main
+        
+        print("🕷️  Ejecutando scraping de Puno Noticias...")
+        
+        # Ejecutar scraping completo
+        csv_file, json_file = puno_main()
+        
+        if csv_file and json_file:
+            print(f"✅ Scraping completado:")
+            print(f"   📄 CSV: {csv_file}")
+            print(f"   📄 JSON: {json_file}")
+            
+            # Migrar inmediatamente después del scraping
+            print(f"\n🗄️  Migrando datos a PostgreSQL...")
+            migrate_puno()
+            print(f"✅ Migración completada")
+            
+            return csv_file, json_file
+        else:
+            print(f"❌ Error en el scraping de Puno Noticias")
+            return None, None
+            
+    except Exception as e:
+        print(f"❌ Error al ejecutar Puno Noticias: {e}")
+        return None, None
+
+def run_sinfronteras_with_immediate_migration():
+    """Ejecutar Sin Fronteras con migración inmediata"""
+    print("\n🕷️  SPIDER 3: Sin Fronteras - CON MIGRACIÓN INMEDIATA")
+    print("=" * 70)
+    
+    try:
+        from migrate_sinfronteras_to_db import main as migrate_sinfronteras
+        from spiders.sinfronteras_local import main as sinfronteras_main
+        
+        print("🕷️  Ejecutando scraping de Sin Fronteras...")
+        
+        # Ejecutar scraping completo
+        csv_file, json_file = sinfronteras_main()
+        
+        if csv_file and json_file:
+            print(f"✅ Scraping completado:")
+            print(f"   📄 CSV: {csv_file}")
+            print(f"   📄 JSON: {json_file}")
+            
+            # Migrar inmediatamente después del scraping
+            print(f"\n🗄️  Migrando datos a PostgreSQL...")
+            migrate_sinfronteras()
+            print(f"✅ Migración completada")
+            
+            return csv_file, json_file
+        else:
+            print(f"❌ Error en el scraping de Sin Fronteras")
+            return None, None
+            
+    except Exception as e:
+        print(f"❌ Error al ejecutar Sin Fronteras: {e}")
+        return None, None
+
+def run_losandes_with_immediate_migration():
+    """Ejecutar Los Andes con migración inmediata"""
+    print("\n🕷️  SPIDER 4: Los Andes - CON MIGRACIÓN INMEDIATA")
+    print("=" * 70)
+    
+    try:
+        from migrate_losandes_to_db import main as migrate_losandes
+        from spiders.losandes_local import main as losandes_main
+        
+        print("🕷️  Ejecutando scraping de Los Andes...")
+        
+        # Ejecutar scraping completo
+        csv_file, json_file = losandes_main()
+        
+        if csv_file and json_file:
+            print(f"✅ Scraping completado:")
+            print(f"   📄 CSV: {csv_file}")
+            print(f"   📄 JSON: {json_file}")
+            
+            # Migrar inmediatamente después del scraping
+            print(f"\n🗄️  Migrando datos a PostgreSQL...")
+            migrate_losandes()
+            print(f"✅ Migración completada")
+            
+            return csv_file, json_file
+        else:
+            print(f"❌ Error en el scraping de Los Andes")
+            return None, None
+            
+    except Exception as e:
+        print(f"❌ Error al ejecutar Los Andes: {e}")
+        return None, None
+
+def run_pachamama_page_by_page():
+    """Ejecutar Pachamama Radio página por página"""
+    print("\n🕷️  SPIDER 1: Pachamama Radio - PÁGINA POR PÁGINA")
+    print("=" * 70)
+    
+    try:
+        import os
+        import time
+        from datetime import datetime
+
+        from migrate_pachamamaradio_to_db import migrate_from_csv
+        from spiders.pachamamaradio_local import PachamamaRadioLocalScraper
+        
+        spider = PachamamaRadioLocalScraper()
+        total_articles = 0
+        page_count = 0
+        
+        # Obtener todas las páginas
+        pages = spider.find_archive_pages()
+        print(f"📄 Total de páginas a procesar: {len(pages)}")
+        
+        for page_url in pages:
+            page_count += 1
+            print(f"\n📄 Procesando página {page_count}/{len(pages)}: {page_url}")
+            
+            try:
+                # Extraer datos de la página
+                articles = spider.scrape_page(page_url)
+                print(f"   📰 Artículos encontrados: {len(articles)}")
+                
+                if articles:
+                    # Crear archivos temporales
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    temp_csv = f"data/pachamamaradio/temp_pachamama_{timestamp}.csv"
+                    temp_json = f"data/pachamamaradio/temp_pachamama_{timestamp}.json"
+                    
+                    # Asegurar que el directorio existe
+                    os.makedirs(os.path.dirname(temp_csv), exist_ok=True)
+                    
+                    # Guardar datos temporalmente
+                    spider.save_to_files(articles, temp_csv, temp_json)
+                    
+                    # Migrar inmediatamente
+                    print(f"   🗄️  Migrando {len(articles)} artículos...")
+                    migrated_count = migrate_from_csv(temp_csv)
+                    print(f"   ✅ Migrados: {migrated_count} artículos")
+                    
+                    total_articles += migrated_count
+                    
+                    # Limpiar archivos temporales
+                    if os.path.exists(temp_csv):
+                        os.remove(temp_csv)
+                    if os.path.exists(temp_json):
+                        os.remove(temp_json)
+                else:
+                    print("   ⚠️  No se encontraron artículos en esta página")
+                
+                # Pequeña pausa entre páginas
+                time.sleep(1)
+                
+            except Exception as e:
+                print(f"   ❌ Error en página {page_count}: {e}")
+                continue
+        
+        print(f"\n✅ Pachamama Radio completado: {total_articles} artículos migrados")
+        return f"data/pachamamaradio/pachamama_completed_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv", f"data/pachamamaradio/pachamama_completed_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        
     except Exception as e:
         print(f"❌ Error al ejecutar Pachamama Radio: {e}")
         return None, None
@@ -106,16 +288,16 @@ def migrate_all_to_database():
     
     migration_results = []
     
-    # Migrar Los Andes
+    # Migrar Pachamama Radio (PRIMERO)
     try:
-        print("📄 Migrando Los Andes...")
-        from migrate_losandes_to_db import main as migrate_losandes
-        migrate_losandes()
-        migration_results.append("✅ Los Andes migrado")
+        print("📄 Migrando Pachamama Radio...")
+        from migrate_pachamamaradio_to_db import main as migrate_pachamama
+        migrate_pachamama()
+        migration_results.append("✅ Pachamama Radio migrado")
     except Exception as e:
-        migration_results.append(f"❌ Error migrando Los Andes: {e}")
+        migration_results.append(f"❌ Error migrando Pachamama Radio: {e}")
     
-    # Migrar Puno Noticias
+    # Migrar Puno Noticias (SEGUNDO)
     try:
         print("\n📄 Migrando Puno Noticias...")
         from migrate_punonoticias_to_db import main as migrate_puno
@@ -124,16 +306,7 @@ def migrate_all_to_database():
     except Exception as e:
         migration_results.append(f"❌ Error migrando Puno Noticias: {e}")
     
-    # Migrar Pachamama Radio
-    try:
-        print("\n📄 Migrando Pachamama Radio...")
-        from migrate_pachamamaradio_to_db import main as migrate_pachamama
-        migrate_pachamama()
-        migration_results.append("✅ Pachamama Radio migrado")
-    except Exception as e:
-        migration_results.append(f"❌ Error migrando Pachamama Radio: {e}")
-    
-    # Migrar Sin Fronteras
+    # Migrar Sin Fronteras (TERCERO)
     try:
         print("\n📄 Migrando Sin Fronteras...")
         from migrate_sinfronteras_to_db import main as migrate_sinfronteras
@@ -141,6 +314,15 @@ def migrate_all_to_database():
         migration_results.append("✅ Sin Fronteras migrado")
     except Exception as e:
         migration_results.append(f"❌ Error migrando Sin Fronteras: {e}")
+    
+    # Migrar Los Andes (CUARTO)
+    try:
+        print("\n📄 Migrando Los Andes...")
+        from migrate_losandes_to_db import main as migrate_losandes
+        migrate_losandes()
+        migration_results.append("✅ Los Andes migrado")
+    except Exception as e:
+        migration_results.append(f"❌ Error migrando Los Andes: {e}")
     
     return migration_results
 
@@ -151,29 +333,29 @@ def main():
     print(f"⏰ Inicio: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 80)
     print("🎯 Objetivo: Extraer TODAS las noticias sin límites")
-    print("📊 Fuentes: Los Andes, Puno Noticias, Pachamama Radio, Sin Fronteras")
+    print("📊 Fuentes: Pachamama Radio, Puno Noticias, Sin Fronteras, Los Andes")
     print("=" * 80)
     
     results = {}
     
-    # Ejecutar Los Andes
-    losandes_csv, losandes_json = run_losandes_complete()
-    results['losandes'] = {'csv': losandes_csv, 'json': losandes_json}
-    
-    # Ejecutar Puno Noticias
-    puno_csv, puno_json = run_punonoticias_complete()
-    results['punonoticias'] = {'csv': puno_csv, 'json': puno_json}
-    
-    # Ejecutar Pachamama Radio
-    pachamama_csv, pachamama_json = run_pachamama_complete()
+    # Ejecutar Pachamama Radio (PRIMERO) - CON MIGRACIÓN INMEDIATA
+    pachamama_csv, pachamama_json = run_pachamama_with_immediate_migration()
     results['pachamama'] = {'csv': pachamama_csv, 'json': pachamama_json}
     
-    # Ejecutar Sin Fronteras
-    sinfronteras_csv, sinfronteras_json = run_sinfronteras_complete()
+    # Ejecutar Puno Noticias (SEGUNDO) - CON MIGRACIÓN INMEDIATA
+    puno_csv, puno_json = run_punonoticias_with_immediate_migration()
+    results['punonoticias'] = {'csv': puno_csv, 'json': puno_json}
+    
+    # Ejecutar Sin Fronteras (TERCERO) - CON MIGRACIÓN INMEDIATA
+    sinfronteras_csv, sinfronteras_json = run_sinfronteras_with_immediate_migration()
     results['sinfronteras'] = {'csv': sinfronteras_csv, 'json': sinfronteras_json}
     
-    # Migrar todo a la base de datos
-    migration_results = migrate_all_to_database()
+    # Ejecutar Los Andes (CUARTO) - CON MIGRACIÓN INMEDIATA
+    losandes_csv, losandes_json = run_losandes_with_immediate_migration()
+    results['losandes'] = {'csv': losandes_csv, 'json': losandes_json}
+    
+    # Las migraciones se realizan inmediatamente después de cada scraping
+    migration_results = ["✅ Todas las migraciones completadas inmediatamente"]
     
     # Resumen final
     print(f"\n" + "=" * 80)

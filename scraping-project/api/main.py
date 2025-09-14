@@ -16,7 +16,17 @@ except Exception:
 def _get_cors_origins() -> list[str]:
     origins_env = os.getenv("FRONTEND_ORIGINS", os.getenv("FRONTEND_ORIGIN", "http://localhost:64959/"))
     # support comma-separated list
-    return [o.strip() for o in origins_env.split(",") if o.strip()]
+    origins = [o.strip() for o in origins_env.split(",") if o.strip()]
+    # Add common local development origins
+    origins.extend([
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "file://",
+        "null"
+    ])
+    return origins
 
 
 app = FastAPI(title="News API", version="1.0.0")

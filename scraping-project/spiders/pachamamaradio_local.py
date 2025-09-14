@@ -197,7 +197,8 @@ class PachamamaRadioLocalScraper:
                 'url': url,
                 'fecha_extraccion': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'imagenes': ', '.join(imagenes) if imagenes else None,
-                'fuente': 'Pachamama Radio'
+                'fuente': 'Pachamama Radio',
+                'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
             
             self.logger.info(f"Extraído: {titulo[:50]}...")
@@ -418,16 +419,36 @@ class PachamamaRadioLocalScraper:
         return list(set(tags)) if tags else []
     
     def extract_images(self, soup):
-        """Extrae las URLs de las imágenes del artículo"""
+        """Extrae las URLs de las imágenes del artículo (máximo 2)"""
         images = []
         img_elements = soup.find_all('img')
         
         for img in img_elements:
             src = img.get('src') or img.get('data-src')
             if src:
+                # Filtrar imágenes muy pequeñas o de interface
+                width = img.get('width')
+                height = img.get('height')
+                
+                if width and height:
+                    try:
+                        w, h = int(width), int(height)
+                        if w < 100 or h < 100:  # Muy pequeñas, probablemente iconos
+                            continue
+                    except ValueError:
+                        pass
+                
+                # Filtrar por nombre de archivo
+                if any(skip in src.lower() for skip in ['icon', 'logo', 'avatar', 'button', 'banner']):
+                    continue
+                
                 full_url = urljoin(self.base_url, src)
                 if full_url not in images:
                     images.append(full_url)
+                    
+                    # Limitar a máximo 2 imágenes
+                    if len(images) >= 2:
+                        break
         
         return images
     
@@ -548,6 +569,23 @@ def main():
     else:
         print("❌ No se pudieron extraer noticias")
         return None, None
+
+    def save_to_files(self, articles, csv_file, json_file):
+        """Guardar artículos en archivos CSV y JSON"""
+        import json
+
+        import pandas as pd
+
+        # Asegurar que el directorio existe
+        os.makedirs(os.path.dirname(csv_file), exist_ok=True)
+        
+        # Guardar CSV
+        df = pd.DataFrame(articles)
+        df.to_csv(csv_file, index=False, encoding='utf-8')
+        
+        # Guardar JSON
+        with open(json_file, 'w', encoding='utf-8') as f:
+            json.dump(articles, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
     main()
