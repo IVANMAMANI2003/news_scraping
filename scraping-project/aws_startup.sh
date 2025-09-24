@@ -32,7 +32,11 @@ cd scraping-project
 cp ../docker-compose-aws.yml .
 cp ../init.sql .
 cp ../start_aws_system.py .
+cp ../start_aws_simple.py .
+cp ../parallel_scraping_system.py .
+cp ../test_parallel_scraping.py .
 cp ../aws_monitor.py .
+cp ../aws_monitor_advanced.py .
 cp ../Dockerfile.aws .
 
 # Crear directorios necesarios

@@ -171,18 +171,11 @@ def cleanup_old_data():
         
         cursor = conn.cursor()
         
-        # Eliminar noticias más antiguas de 30 días
-        cursor.execute("""
-DELETE FROM noticias 
-WHERE fecha_extraccion < %s
-        """, (datetime.now() - timedelta(days=30),))
+        # NO eliminar noticias antiguas - mantener toda la data histórica
+        logger.info("📊 Manteniendo toda la data histórica (sin limpieza automática)")
         
-        deleted_count = cursor.rowcount
-        conn.commit()
         cursor.close()
         conn.close()
-        
-        logger.info(f"✅ Eliminadas {deleted_count} noticias antiguas")
         return True
         
     except Exception as e:

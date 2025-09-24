@@ -134,23 +134,37 @@ def main():
     conn.close()
     logger.info("✅ Base de datos conectada")
     
-    # Lista de fuentes a procesar
-    sources = ['pachamamaradio', 'punonoticias', 'sinfronteras', 'losandes']
-    
-    # Loop principal de scraping
-    while True:
-        logger.info("🔄 Iniciando ciclo de scraping...")
+    # Usar sistema de scraping paralelo
+    try:
+        from parallel_scraping_system import ParallelScrapingSystem
         
-        for source in sources:
-            try:
-                scrape_source_simple(source)
-                time.sleep(60)  # Esperar 1 minuto entre fuentes
-            except Exception as e:
-                logger.error(f"Error procesando {source}: {e}")
-                continue
+        logger.info("🚀 Iniciando sistema de scraping paralelo con 4 hilos")
+        scraping_system = ParallelScrapingSystem(max_workers=4)
         
-        logger.info("⏳ Esperando 2 horas para el siguiente ciclo...")
-        time.sleep(7200)  # Esperar 2 horas
+        # Ejecutar scraping continuo
+        scraping_system.run_continuous_scraping()
+        
+    except ImportError as e:
+        logger.warning(f"⚠️ Sistema paralelo no disponible: {e}")
+        logger.info("🔄 Usando sistema secuencial como fallback")
+        
+        # Fallback al sistema secuencial
+        sources = ['pachamamaradio', 'punonoticias', 'sinfronteras', 'losandes']
+        
+        while True:
+            logger.info("🔄 Iniciando ciclo de scraping secuencial...")
+            
+            for source in sources:
+                try:
+                    scrape_source_simple(source)
+                    time.sleep(60)  # Esperar 1 minuto entre fuentes
+                except Exception as e:
+                    logger.error(f"Error procesando {source}: {e}")
+                    continue
+            
+            logger.info("⏳ Esperando 1 hora para el siguiente ciclo...")
+            time.sleep(3600)  # Esperar 1 hora
 
 if __name__ == "__main__":
     main()
+
