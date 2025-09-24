@@ -43,7 +43,7 @@ services:
       - ./data:/app/data
       - ./logs:/app/logs
     restart: unless-stopped
-    command: python start_aws_simple.py
+    command: python start_aws_system.py
 
 volumes:
   postgres_data:

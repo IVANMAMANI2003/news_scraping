@@ -212,10 +212,7 @@ def main():
     
     # Iniciar Celery Beat
     logger.info("🔄 Iniciando Celery Beat...")
-    
-    # Ejecutar Celery Beat
-    import subprocess
-    subprocess.run(["celery", "-A", "start_aws_system", "beat", "--loglevel=info"])
+    celery_app.start()
 
 if __name__ == "__main__":
     main()

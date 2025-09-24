@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Sistema principal para AWS
-Ejecuta scraping recursivo continuo
+Sistema simple para AWS - Solo scraping sin Celery
 """
 
 import logging
@@ -10,53 +9,17 @@ import time
 from datetime import datetime, timedelta
 
 import psycopg2
-from celery import Celery
-from celery.schedules import crontab
 
 # Configurar logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('logs/aws_system.log'),
+        logging.FileHandler('logs/aws_simple.log'),
         logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
-
-# Configuración Celery para AWS
-celery_app = Celery('aws_news_system')
-celery_app.conf.broker_url = 'redis://redis:6379/0'
-celery_app.conf.result_backend = 'redis://redis:6379/0'
-celery_app.conf.timezone = 'America/Lima'
-
-# Configuración de tareas
-celery_app.conf.beat_schedule = {
-    'scrape-pachamama': {
-        'task': 'scrape_source',
-        'schedule': crontab(minute=0, hour='*/2'),  # Cada 2 horas
-        'args': ('pachamamaradio',)
-    },
-    'scrape-puno': {
-        'task': 'scrape_source',
-        'schedule': crontab(minute=30, hour='*/2'),  # Cada 2 horas, 30 min después
-        'args': ('punonoticias',)
-    },
-    'scrape-sinfronteras': {
-        'task': 'scrape_source',
-        'schedule': crontab(minute=0, hour='*/3'),  # Cada 3 horas
-        'args': ('sinfronteras',)
-    },
-    'scrape-losandes': {
-        'task': 'scrape_source',
-        'schedule': crontab(minute=30, hour='*/3'),  # Cada 3 horas, 30 min después
-        'args': ('losandes',)
-    },
-    'cleanup-old-data': {
-        'task': 'cleanup_old_data',
-        'schedule': crontab(hour=2, minute=0),  # Diario a las 2 AM
-    }
-}
 
 def connect_to_db():
     """Conectar a la base de datos"""
@@ -73,9 +36,8 @@ def connect_to_db():
         logger.error(f"Error conectando a DB: {e}")
         return None
 
-@celery_app.task
-def scrape_source(source_name):
-    """Tarea para hacer scraping de una fuente específica"""
+def scrape_source_simple(source_name):
+    """Hacer scraping de una fuente específica"""
     logger.info(f"🕷️  Iniciando scraping de {source_name}")
     
     try:
@@ -96,25 +58,24 @@ def scrape_source(source_name):
             logger.error(f"Fuente desconocida: {source_name}")
             return False
         
-        # Obtener última página procesada
+        # Configurar scraper para procesar pocas páginas
+        scraper.max_pages = 5  # Solo 5 páginas por ejecución
+        
+        # Ejecutar scraping
+        articles = scraper.scrape_news()
+        
+        if not articles:
+            logger.warning(f"No se extrajeron artículos de {source_name}")
+            return False
+        
+        # Guardar en base de datos
         conn = connect_to_db()
         if not conn:
             return False
         
         cursor = conn.cursor()
-        cursor.execute("SELECT ultima_pagina FROM scraping_control WHERE fuente = %s", (source_name,))
-        result = cursor.fetchone()
-        last_page = result[0] if result else 0
-        
-        # Configurar scraper para continuar desde la última página
-        scraper.start_page = last_page + 1
-        scraper.max_pages = 10  # Procesar 10 páginas por ejecución
-        
-        # Ejecutar scraping
-        articles = scraper.scrape_news()
-        
-        # Guardar en base de datos
         saved_count = 0
+        
         for article in articles:
             try:
                 cursor.execute("""
@@ -141,13 +102,6 @@ ON CONFLICT (url) DO NOTHING
                 logger.error(f"Error guardando artículo: {e}")
                 continue
         
-        # Actualizar control de scraping
-        cursor.execute("""
-UPDATE scraping_control 
-SET ultima_pagina = %s, ultima_ejecucion = %s, total_noticias = total_noticias + %s
-WHERE fuente = %s
-        """, (scraper.start_page + scraper.max_pages - 1, datetime.now(), saved_count, source_name))
-        
         conn.commit()
         cursor.close()
         conn.close()
@@ -159,39 +113,9 @@ WHERE fuente = %s
         logger.error(f"❌ Error en scraping de {source_name}: {e}")
         return False
 
-@celery_app.task
-def cleanup_old_data():
-    """Limpiar datos antiguos (opcional)"""
-    logger.info("🧹 Limpiando datos antiguos...")
-    
-    try:
-        conn = connect_to_db()
-        if not conn:
-            return False
-        
-        cursor = conn.cursor()
-        
-        # Eliminar noticias más antiguas de 30 días
-        cursor.execute("""
-DELETE FROM noticias 
-WHERE fecha_extraccion < %s
-        """, (datetime.now() - timedelta(days=30),))
-        
-        deleted_count = cursor.rowcount
-        conn.commit()
-        cursor.close()
-        conn.close()
-        
-        logger.info(f"✅ Eliminadas {deleted_count} noticias antiguas")
-        return True
-        
-    except Exception as e:
-        logger.error(f"❌ Error en limpieza: {e}")
-        return False
-
 def main():
     """Función principal"""
-    logger.info("🚀 Iniciando sistema AWS de noticias")
+    logger.info("🚀 Iniciando sistema AWS simple de noticias")
     
     # Crear directorios necesarios
     os.makedirs('data', exist_ok=True)
@@ -210,12 +134,23 @@ def main():
     conn.close()
     logger.info("✅ Base de datos conectada")
     
-    # Iniciar Celery Beat
-    logger.info("🔄 Iniciando Celery Beat...")
+    # Lista de fuentes a procesar
+    sources = ['pachamamaradio', 'punonoticias', 'sinfronteras', 'losandes']
     
-    # Ejecutar Celery Beat
-    import subprocess
-    subprocess.run(["celery", "-A", "start_aws_system", "beat", "--loglevel=info"])
+    # Loop principal de scraping
+    while True:
+        logger.info("🔄 Iniciando ciclo de scraping...")
+        
+        for source in sources:
+            try:
+                scrape_source_simple(source)
+                time.sleep(60)  # Esperar 1 minuto entre fuentes
+            except Exception as e:
+                logger.error(f"Error procesando {source}: {e}")
+                continue
+        
+        logger.info("⏳ Esperando 2 horas para el siguiente ciclo...")
+        time.sleep(7200)  # Esperar 2 horas
 
 if __name__ == "__main__":
     main()

@@ -15,9 +15,6 @@ sudo usermod -aG docker ubuntu
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 
-# Agregar usuario ubuntu al grupo docker
-sudo usermod -aG docker ubuntu
-
 # Crear directorio del proyecto
 mkdir -p /home/ubuntu/news-scraping
 cd /home/ubuntu/news-scraping
@@ -39,7 +36,7 @@ cp ../Dockerfile.aws .
 mkdir -p data logs
 
 # Iniciar servicios
-sudo docker-compose -f docker-compose-aws.yml up -d --build
+docker-compose -f docker-compose-aws.yml up -d --build
 
 echo "✅ Sistema iniciado correctamente"
-echo "📊 Monitorear con: sudo docker-compose -f docker-compose-aws.yml logs -f"
+echo "📊 Monitorear con: docker-compose -f docker-compose-aws.yml logs -f"
