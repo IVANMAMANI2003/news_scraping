@@ -67,6 +67,11 @@ celery_app.conf.beat_schedule = {
         'schedule': 21600.0,  # 6 horas en segundos
         'options': {'queue': 'scraping'}
     },
+    'daily-scraping': {
+        'task': 'celery_tasks.scraping_tasks.daily_scraping',
+        'schedule': 86400.0,  # 24 horas en segundos
+        'options': {'queue': 'scraping'}
+    },
     # Limpieza automática deshabilitada para mantener máximo historial de datos
     # 'cleanup-old-data': {
     #     'task': 'celery_tasks.cleanup_tasks.cleanup_old_data',

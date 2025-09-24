@@ -6,7 +6,12 @@ from psycopg2.pool import SimpleConnectionPool
 
 
 def build_conn_str() -> str:
-    host = os.getenv("PGHOST", "127.0.0.1")
+    # En Docker, usar el nombre del contenedor
+    if os.getenv('DOCKER_ENV'):
+        host = 'postgres'  # Nombre del contenedor
+    else:
+        host = os.getenv("PGHOST", "127.0.0.1")
+    
     port = os.getenv("PGPORT", "5432")
     db = os.getenv("PGDATABASE", "noticias")
     user = os.getenv("PGUSER", "postgres")

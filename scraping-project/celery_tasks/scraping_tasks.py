@@ -206,3 +206,79 @@ def check_duplicates(self, source_key, articles_data):
             'unique_articles': len(articles_data),
             'error': str(e)
         }
+
+@celery_app.task(bind=True, name='daily_scraping')
+def daily_scraping(self):
+    """
+    Tarea de scraping diario que continúa donde quedó
+    """
+    logger.info("🌅 Iniciando scraping diario")
+    
+    try:
+        # Verificar última ejecución
+        from config.database import get_db_connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Obtener última fecha de extracción por fuente
+        cursor.execute("""
+            SELECT fuente, MAX(fecha_extraccion) as ultima_extraccion 
+            FROM noticias 
+            GROUP BY fuente
+        """)
+        last_extractions = dict(cursor.fetchall())
+        
+        cursor.close()
+        conn.close()
+        
+        logger.info(f"📊 Últimas extracciones: {last_extractions}")
+        
+        # Ejecutar scraping de todas las fuentes
+        results = {}
+        total_articles = 0
+        
+        for source_key, source_config in NEWS_SOURCES.items():
+            if source_config['enabled']:
+                logger.info(f"📰 Scraping diario de {source_config['name']}")
+                
+                # Ejecutar tarea de scraping individual
+                task_result = scrape_single_source.delay(source_key)
+                results[source_key] = {
+                    'task_id': task_result.id,
+                    'status': 'started',
+                    'source_name': source_config['name']
+                }
+        
+        # Esperar a que terminen todas las tareas
+        for source_key, result in results.items():
+            try:
+                task_result = celery_app.AsyncResult(result['task_id'])
+                final_result = task_result.get(timeout=600)  # 10 minutos timeout
+                
+                results[source_key]['status'] = 'completed'
+                results[source_key]['articles_count'] = final_result.get('articles_count', 0)
+                total_articles += final_result.get('articles_count', 0)
+                
+                logger.info(f"✅ {result['source_name']}: {final_result.get('articles_count', 0)} artículos")
+                
+            except Exception as e:
+                results[source_key]['status'] = 'failed'
+                results[source_key]['error'] = str(e)
+                logger.error(f"❌ Error en {result['source_name']}: {e}")
+        
+        logger.info(f"🎉 Scraping diario completado. Total: {total_articles} artículos")
+        
+        return {
+            'status': 'completed',
+            'total_articles': total_articles,
+            'sources': results,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error en scraping diario: {e}")
+        return {
+            'status': 'failed',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }
