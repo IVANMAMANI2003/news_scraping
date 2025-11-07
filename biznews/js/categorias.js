@@ -87,7 +87,7 @@
         
         // Si hay noticias, obtener una muestra para aplicar filtros
         if (totalCount > 0) {
-            const sampleRes = await fetch(`${API_BASE_URL}/news/categorias/${encodeURIComponent(categoriaName)}?limit=100${dateParams}`, { 
+            const sampleRes = await fetch(`${API_BASE_URL}/news/categorias/${encodeURIComponent(categoriaName)}${dateParams ? `?${dateParams.slice(1)}` : ''}`, { 
                 headers: { "Accept": "application/json" } 
             });
             if (!sampleRes.ok) throw new Error(`Error fetching sample for categoria ${categoriaName}: ${sampleRes.status}`);
@@ -161,7 +161,7 @@
     }
 
     async function renderCategoriasCards(categorias, newsByCategoria, timeFilter = 'all') {
-        const container = document.getElementById('categorias-container');
+        const container = document.getElementById('categories-container');
         if (!container) return;
 
         const cards = await Promise.all(categorias.map(async (categoria) => {
@@ -271,7 +271,7 @@
             renderCategoriasCards(categorias, newsByCategoria);
         } catch (err) {
             console.error('Error initializing categorias page:', err);
-            const container = document.getElementById('categorias-container');
+            const container = document.getElementById('categories-container');
             if (container) {
                 container.innerHTML = `
                     <div class="col-12">

@@ -3,6 +3,7 @@
 
     const API_BASE_URL = "http://127.0.0.1:8000";
     const NEWS_ENDPOINT = API_BASE_URL + "/news";
+    const ADVANCED_ENDPOINT = API_BASE_URL + "/api";
 
     async function fetchNews() {
         const res = await fetch(NEWS_ENDPOINT, { headers: { "Accept": "application/json" } });
@@ -48,72 +49,69 @@
     }
 
     async function fetchNewsByFuente(fuenteName, timeFilter = 'all') {
-        // Construir parámetros de fecha
-        let dateParams = '';
-        if (timeFilter !== 'all') {
-            const now = new Date();
-            let startDate;
-            
-            switch (timeFilter) {
-                case 'today':
-                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                    break;
-                case 'week':
-                    startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                    break;
-                case 'month':
-                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-                    break;
-                case 'year':
-                    startDate = new Date(now.getFullYear(), 0, 1);
-                    break;
+        try {
+            // Construir parámetros de fecha
+            let dateParams = '';
+            if (timeFilter !== 'all') {
+                const now = new Date();
+                let startDate;
+                
+                switch (timeFilter) {
+                    case 'today':
+                        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        break;
+                    case 'week':
+                        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        break;
+                    case 'month':
+                        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                        break;
+                    case 'year':
+                        startDate = new Date(now.getFullYear(), 0, 1);
+                        break;
+                }
+                
+                if (startDate) {
+                    const isoDate = startDate.toISOString().split('T')[0];
+                    dateParams = `&fecha_desde=${isoDate}`;
+                }
             }
             
-            if (startDate) {
-                const isoDate = startDate.toISOString().split('T')[0];
-                dateParams = `&fecha_desde=${isoDate}`;
-            }
-        }
-        
-        // Primero obtener solo el conteo total
-        const countRes = await fetch(`${API_BASE_URL}/news/fuentes/${encodeURIComponent(fuenteName)}?limit=1${dateParams}`, { 
-            headers: { "Accept": "application/json" } 
-        });
-        if (!countRes.ok) throw new Error(`Error fetching count for fuente ${fuenteName}: ${countRes.status}`);
-        const countData = await countRes.json();
-        const totalCount = countData.total || 0;
-        
-        console.log(`${fuenteName} (${timeFilter}): Total de noticias en API: ${totalCount}`);
-        
-        // Si hay noticias, obtener una muestra para aplicar filtros
-        if (totalCount > 0) {
-            const sampleRes = await fetch(`${API_BASE_URL}/news/fuentes/${encodeURIComponent(fuenteName)}?limit=100${dateParams}`, { 
+            console.log(`Buscando noticias de ${fuenteName} con filtro ${timeFilter}`);
+            
+            // Usar el endpoint específico de fuentes
+            const res = await fetch(`${API_BASE_URL}/news/fuentes/${encodeURIComponent(fuenteName)}${dateParams ? `?${dateParams.slice(1)}` : ''}`, { 
                 headers: { "Accept": "application/json" } 
             });
-            if (!sampleRes.ok) throw new Error(`Error fetching sample for fuente ${fuenteName}: ${sampleRes.status}`);
-            const sampleData = await sampleRes.json();
-            const sampleNews = Array.isArray(sampleData) ? sampleData : (sampleData.items || []);
             
-            // Aplicar los mismos filtros
-            const filteredNews = sampleNews.filter(news => {
-                if (news.titulo && news.titulo.toLowerCase().includes('login/register')) return false;
-                if (news.titulo && news.titulo.toLowerCase().includes('pachamama radio') && 
-                    news.resumen && news.resumen.includes('[tdc_zone')) return false;
-                if (news.resumen && news.resumen.includes('[tdc_zone type="tdc_content"]')) return false;
-                if (news.resumen && news.resumen.length > 500 && news.resumen.includes('[')) return false;
-                if (!news.titulo || news.titulo.trim() === '' || news.titulo === 'null' || news.titulo === 'undefined') return false;
+            if (!res.ok) {
+                throw new Error(`Error fetching news for fuente ${fuenteName}: ${res.status}`);
+            }
+            
+            const data = await res.json();
+            const news = Array.isArray(data) ? data : (data.items || []);
+            const totalCount = data.total || news.length;
+            
+            console.log(`${fuenteName} (${timeFilter}): Total de noticias en API: ${totalCount}, obtenidas: ${news.length}`);
+            
+            // Aplicar filtros de limpieza
+            const filteredNews = news.filter(article => {
+                if (article.titulo && article.titulo.toLowerCase().includes('login/register')) return false;
+                if (article.titulo && article.titulo.toLowerCase().includes('pachamama radio') && 
+                    article.resumen && article.resumen.includes('[tdc_zone')) return false;
+                if (article.resumen && article.resumen.includes('[tdc_zone type="tdc_content"]')) return false;
+                if (article.resumen && article.resumen.length > 500 && article.resumen.includes('[')) return false;
+                if (!article.titulo || article.titulo.trim() === '' || article.titulo === 'null' || article.titulo === 'undefined') return false;
                 return true;
             });
             
-            // Calcular el porcentaje de noticias válidas y estimar el total filtrado
-            const validPercentage = sampleNews.length > 0 ? filteredNews.length / sampleNews.length : 1;
-            const estimatedValidCount = Math.round(totalCount * validPercentage);
+            console.log(`${fuenteName} (${timeFilter}): ${filteredNews.length} noticias válidas después del filtrado`);
             
-            console.log(`${fuenteName} (${timeFilter}): ${filteredNews.length} válidas de ${sampleNews.length} muestra, estimado total: ${estimatedValidCount}`);
-            return { count: estimatedValidCount, news: filteredNews };
+            return { count: totalCount, news: filteredNews };
+        } catch (error) {
+            console.error(`Error fetching news for fuente ${fuenteName}:`, error);
+            return { count: 0, news: [] };
         }
-        
-        return { count: 0, news: [] };
     }
 
     async function fetchFuentes() {
@@ -161,7 +159,7 @@
     }
 
     async function renderFuentesCards(fuentes, newsByFuente, timeFilter = 'all') {
-        const container = document.getElementById('fuentes-container');
+        const container = document.getElementById('sources-container');
         if (!container) return;
 
         const cards = await Promise.all(fuentes.map(async (fuente) => {
@@ -271,7 +269,7 @@
             renderFuentesCards(fuentes, newsByFuente);
         } catch (err) {
             console.error('Error initializing fuentes page:', err);
-            const container = document.getElementById('fuentes-container');
+            const container = document.getElementById('sources-container');
             if (container) {
                 container.innerHTML = `
                     <div class="col-12">

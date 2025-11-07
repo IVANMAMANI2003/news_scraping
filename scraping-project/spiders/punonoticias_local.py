@@ -16,7 +16,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-class PunoNoticiasLocalScraper:
+class PunonoticiasLocalScraper:
     def __init__(self):
         self.base_url = "https://punonoticias.pe"
         self.session = requests.Session()
@@ -413,7 +413,7 @@ def main():
     print("🚀 Iniciando scraping de Puno Noticias...")
     print("=" * 50)
     
-    scraper = PunoNoticiasLocalScraper()
+    scraper = PunonoticiasLocalScraper()
     
     # Realizar scraping COMPLETO
     news_data = scraper.scrape_news()

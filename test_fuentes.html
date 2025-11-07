@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fuentes</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .news-item { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Test de Funcionalidad de Fuentes</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Los Andes</h2>
+        <button onclick="testFuente('Los Andes')">Probar Los Andes</button>
+        <div id="result-los-andes"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Puno Noticias</h2>
+        <button onclick="testFuente('Puno Noticias')">Probar Puno Noticias</button>
+        <div id="result-puno-noticias"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Pachamama Radio</h2>
+        <button onclick="testFuente('Pachamama Radio')">Probar Pachamama Radio</button>
+        <div id="result-pachamama-radio"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:8000";
+        
+        async function testFuente(fuenteName) {
+            const resultId = `result-${fuenteName.toLowerCase().replace(/\s+/g, '-')}`;
+            const resultDiv = document.getElementById(resultId);
+            
+            try {
+                resultDiv.innerHTML = '<p>Cargando...</p>';
+                
+                console.log(`Probando fuente: ${fuenteName}`);
+                
+                const res = await fetch(`${API_BASE_URL}/news/fuentes/${encodeURIComponent(fuenteName)}?limit=10`, { 
+                    headers: { "Accept": "application/json" } 
+                });
+                
+                if (!res.ok) {
+                    throw new Error(`Error ${res.status}: ${res.statusText}`);
+                }
+                
+                const data = await res.json();
+                console.log('Respuesta de la API:', data);
+                
+                const news = Array.isArray(data) ? data : (data.items || []);
+                const totalCount = data.total || news.length;
+                
+                let html = `<h3>Resultado para ${fuenteName}</h3>`;
+                html += `<p><strong>Total en API:</strong> ${totalCount}</p>`;
+                html += `<p><strong>Obtenidas:</strong> ${news.length}</p>`;
+                
+                if (news.length > 0) {
+                    html += '<h4>Primeras 3 noticias:</h4>';
+                    news.slice(0, 3).forEach((article, index) => {
+                        html += `
+                            <div class="news-item">
+                                <strong>${index + 1}. ${article.titulo || 'Sin título'}</strong><br>
+                                <small>Categoría: ${article.categoria || 'N/A'}</small><br>
+                                <small>Fecha: ${article.fecha || 'N/A'}</small><br>
+                                <small>Resumen: ${(article.resumen || '').substring(0, 100)}...</small>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += '<p class="error">No se encontraron noticias</p>';
+                }
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

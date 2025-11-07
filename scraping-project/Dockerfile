@@ -1,35 +1,25 @@
 FROM python:3.11-slim
 
-# Establecer directorio de trabajo
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    DOCKER_ENV=1
+
 WORKDIR /app
 
-# Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+# System deps
+RUN apt-get update -y && apt-get install -y build-essential libpq-dev curl && rm -rf /var/lib/apt/lists/*
 
-# Copiar archivos de dependencias
-COPY api/requirements.txt .
+# Copy requirements and install
+COPY api/requirements.txt /app/api/requirements.txt
+RUN pip install --no-cache-dir -r /app/api/requirements.txt
 
-# Instalar dependencias de Python
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy project
+COPY . /app
 
-# Copiar código fuente
-COPY . .
-
-# Crear directorios necesarios
-RUN mkdir -p data logs celery_tasks celery_workers
-
-# Copiar archivos de configuración
-COPY celery_app.py .
-COPY celery_tasks/ ./celery_tasks/
-COPY celery_workers/ ./celery_workers/
-COPY config/ ./config/
-
-# Exponer puerto
 EXPOSE 8000
 
-# Comando por defecto
-CMD ["python", "start_automatic_system.py"]
+# Default command runs the API; scheduler container overrides this
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+

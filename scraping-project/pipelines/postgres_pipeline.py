@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import datetime
 
 import psycopg2
@@ -14,13 +15,23 @@ class PostgresPipeline:
     def open_spider(self, spider):
         """Abre la conexión a PostgreSQL cuando inicia el spider"""
         try:
+            # Configuración de la base de datos desde variables de entorno
+            # PGHOST se establece en docker-compose.yml (postgres en Docker, localhost localmente)
+            db_host = os.getenv("PGHOST", "localhost")
+            db_name = os.getenv("PGDATABASE", "noticias")
+            db_user = os.getenv("PGUSER", "postgres")
+            db_password = os.getenv("PGPASSWORD", "123456")
+            db_port = os.getenv("PGPORT", "5432")
+            
+            spider.logger.info(f"Conectando a PostgreSQL: {db_host}:{db_port}/{db_name}")
+            
             # Configuración de la base de datos
             self.connection = psycopg2.connect(
-                host="localhost",
-                database="noticias",
-                user="root",
-                password="123456",  # Cambia por tu contraseña
-                port="5432"
+                host=db_host,
+                database=db_name,
+                user=db_user,
+                password=db_password,
+                port=db_port
             )
             self.cursor = self.connection.cursor(cursor_factory=RealDictCursor)
             spider.logger.info("Conexión a PostgreSQL establecida correctamente")

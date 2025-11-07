@@ -34,6 +34,7 @@ class SinFronterasLocalScraper:
         self.all_news = []
         self.processed_urls = set()
         self.lock = threading.Lock()
+        self.max_pages_to_explore = 1000
         
         # Crear carpeta de datos si no existe
         self.data_folder = "data/sinfronteras"
@@ -432,7 +433,7 @@ class SinFronterasLocalScraper:
         visited_pages = set()
         all_article_urls = set()
         
-        while pages_to_visit:
+        while pages_to_visit and len(visited_pages) < self.max_pages_to_explore:
             current_page = pages_to_visit.pop(0)
             
             if current_page in visited_pages:
@@ -457,6 +458,8 @@ class SinFronterasLocalScraper:
                 pagination_links = self.get_pagination_urls(soup)
                 for link in pagination_links:
                     if link not in visited_pages:
+                        if len(visited_pages) + len(pages_to_visit) >= self.max_pages_to_explore:
+                            break
                         pages_to_visit.append(link)
                 
                 # Buscar enlaces internos adicionales
@@ -469,6 +472,8 @@ class SinFronterasLocalScraper:
                             full_url not in visited_pages and 
                             full_url not in pages_to_visit and
                             not self.is_article_url(full_url)):
+                            if len(visited_pages) + len(pages_to_visit) >= self.max_pages_to_explore:
+                                break
                             pages_to_visit.append(full_url)
                 
                 time.sleep(1)  # Pausa entre requests
@@ -477,7 +482,10 @@ class SinFronterasLocalScraper:
                 print(f"Error explorando {current_page}: {str(e)}")
                 continue
         
-        print(f"✅ Descubrimiento completado. {len(all_article_urls)} artículos encontrados")
+        if pages_to_visit:
+            print(f"⚠️  Límite de {self.max_pages_to_explore} páginas alcanzado. Se detuvo la exploración adicional.")
+
+        print(f"✅ Descubrimiento completado. {len(all_article_urls)} artículos encontrados tras explorar {len(visited_pages)} páginas")
         return list(all_article_urls)
     
     def scrape_article(self, url):

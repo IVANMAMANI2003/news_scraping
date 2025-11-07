@@ -12,10 +12,11 @@ ITEM_PIPELINES = {
    "pipelines.postgres_pipeline.PostgresPipeline": 400,
 }
 
-FEEDS = {
-    'data/%(name)s_%(time)s.json': {'format': 'json'},
-    'data/%(name)s_%(time)s.csv': {'format': 'csv'},
-}
+# FEEDS deshabilitado - los archivos se exportan desde scheduler_daily.py en las subcarpetas correctas
+# FEEDS = {
+#     'data/%(name)s_%(time)s.json': {'format': 'json'},
+#     'data/%(name)s_%(time)s.csv': {'format': 'csv'},
+# }
 
 # Configuración de logging
 LOG_LEVEL = 'INFO'

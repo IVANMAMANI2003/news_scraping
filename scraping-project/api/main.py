@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .db import close_pool, init_pool
-from .routers import news
+from .routers import advanced, metadata, news, social
 
 try:
     from dotenv import load_dotenv  # type: ignore
@@ -13,27 +13,11 @@ except Exception:
     pass
 
 
-def _get_cors_origins() -> list[str]:
-    origins_env = os.getenv("FRONTEND_ORIGINS", os.getenv("FRONTEND_ORIGIN", "http://localhost:64959/"))
-    # support comma-separated list
-    origins = [o.strip() for o in origins_env.split(",") if o.strip()]
-    # Add common local development origins
-    origins.extend([
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:8080",
-        "http://127.0.0.1:8080",
-        "file://",
-        "null"
-    ])
-    return origins
-
-
 app = FastAPI(title="News API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_get_cors_origins(),
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,6 +30,9 @@ async def health():
 
 
 app.include_router(news.router, prefix="/news", tags=["news"])
+app.include_router(advanced.router, prefix="/api", tags=["advanced"])
+app.include_router(metadata.router, prefix="/news", tags=["metadata"])
+app.include_router(social.router, prefix="/social", tags=["social"])
 
 
 # Uvicorn entrypoint: uvicorn api.main:app --reload

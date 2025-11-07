@@ -67,6 +67,51 @@ scrapy crawl sinfronteras
 python run_all_spiders_complete.py
 ```
 
+### 6. Automatización diaria (local)
+
+Sin Docker ni AWS, puedes programar el scraping diario con el planificador incluido.
+
+1) Arranca la API (para el scraping social):
+```bash
+uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+2) En otra ventana, inicia el planificador:
+```bash
+start_scheduler.bat
+```
+
+Esto ejecuta cada día a las 06:00:
+- scrape_losandes_now.py
+- scrape_pachamamaradio_now.py
+- scrape_punonoticias_now.py
+- run_sinfronteras_complete.py
+- POST http://127.0.0.1:8000/social/scrape (inserta solo nuevas por URL)
+
+Para cambiar la hora, edita `scheduler_daily.py` (variables `target_h`, `target_m`).
+
+### 7. Automatización diaria con Docker
+
+Se incluye `Dockerfile` y `docker-compose.yml` con 3 servicios: `postgres`, `api`, `scheduler`.
+
+Arranque:
+```bash
+cd scraping-project
+docker compose up -d --build
+```
+
+Detalles:
+- API disponible en http://localhost:8000
+- El scheduler dentro del contenedor ejecuta `scheduler_daily.py` y dispara cada día a las 06:00:
+  - Ejecuta los 4 scrapers de sitios
+  - Llama a `POST http://api:8000/social/scrape` (solo nuevas por URL)
+- Variables de BD configuradas en `docker-compose.yml` (PGHOST=postgres, etc.).
+
+Detener:
+```bash
+docker compose down
+```
+
 ## 📁 Estructura del Proyecto
 
 ```

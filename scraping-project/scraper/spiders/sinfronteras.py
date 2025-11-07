@@ -1,407 +1,618 @@
+#!/usr/bin/env python3
+"""
+Spider local para Sin Fronteras - Adaptado desde Colab
+Extrae noticias y las guarda en CSV/JSON en la carpeta data/sinfronteras
+"""
+
+import json
+import os
 import re
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
-import scrapy
-from scrapy.http import Request
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
-
-from items import NewsItem
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 
-class SinfronterasSpider(CrawlSpider):
-    name = 'sinfronteras'
-    allowed_domains = ['sinfronteras.com.pe']
-    start_urls = ['https://sinfronteras.com.pe']
+class SinFronterasLocalScraper:
+    def __init__(self):
+        self.base_url = "https://diariosinfronteras.com.pe"
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Cache-Control': 'no-cache'
+        })
+        self.all_news = []
+        self.processed_urls = set()
+        self.lock = threading.Lock()
+        
+        # Crear carpeta de datos si no existe
+        self.data_folder = "data/sinfronteras"
+        os.makedirs(self.data_folder, exist_ok=True)
+        
+    def get_page(self, url, retries=3):
+        """Obtiene el contenido de una página con reintentos"""
+        for attempt in range(retries):
+            try:
+                response = self.session.get(url, timeout=30)
+                response.raise_for_status()
+                return response
+            except Exception as e:
+                print(f"Error en intento {attempt + 1} para {url}: {str(e)}")
+                if attempt < retries - 1:
+                    time.sleep(3)
+                else:
+                    return None
     
-    # Reglas para seguir enlaces específicos de Sin Fronteras
-    rules = (
-        Rule(LinkExtractor(
-            allow=[
-                r'/noticia/',
-                r'/articulo/',
-                r'/post/',
-                r'/actualidad/',
-                r'/deportes/',
-                r'/economia/',
-                r'/politica/',
-                r'/local/',
-                r'/nacional/',
-                r'/internacional/',
-                r'/puno/',
-                r'/juliaca/',
-                r'/region/',
-                r'/sociedad/',
-                r'/cultura/',
-                r'/tecnologia/',
-            ],
-            deny=[
-                r'/categoria',
-                r'/category',
-                r'/tag/',
-                r'/etiqueta/',
-                r'/autor/',
-                r'/author/',
-                r'/buscar',
-                r'/search',
-                r'/page/',
-                r'/pagina/',
-                r'#',
-                r'\.pdf$',
-                r'\.jpg$',
-                r'\.jpeg$',
-                r'\.png$',
-                r'\.gif$',
-                r'\.mp4$',
-            ]
-        ), callback='parse_article', follow=True),
-    )
-    
-    def parse_article(self, response):
-        """Extrae datos de un artículo individual"""
-        
-        # Verificar si es realmente un artículo
-        if not self.is_article_page(response):
-            return
-        
-        item = NewsItem()
-        
-        # Título
-        title_selectors = [
-            'h1.entry-title',
-            'h1.post-title',
-            'h1.article-title',
-            'h1.title',
-            '.entry-header h1',
-            '.post-header h1',
-            '.article-header h1',
-            'article h1',
-            '.content-title',
-            '.main-title',
-            'h1',
-            '.headline',
-            '.single-post-title',
-            '.post-single-title'
+    def extract_images(self, soup):
+        """Extrae imágenes de un artículo (máximo 2)"""
+        images = []
+        img_selectors = [
+            'img[src]',
+            'img[data-src]',
+            'img[data-lazy-src]',
+            '.wp-post-image',
+            '.featured-image img',
+            '.post-thumbnail img',
+            '.entry-content img',
+            '.article-content img'
         ]
         
-        for selector in title_selectors:
-            title = response.css(selector + '::text').get()
-            if title and title.strip():
-                item['titulo'] = title.strip()
+        for selector in img_selectors:
+            img_tags = soup.select(selector)
+            for img in img_tags:
+                src = (img.get('src') or 
+                      img.get('data-src') or 
+                      img.get('data-lazy-src') or 
+                      img.get('data-original'))
+                if src and src not in [img.split('?')[0] for img in images]:
+                    # Filtrar imágenes muy pequeñas o de interface
+                    width = img.get('width')
+                    height = img.get('height')
+                    
+                    if width and height:
+                        try:
+                            w, h = int(width), int(height)
+                            if w < 100 or h < 100:  # Muy pequeñas, probablemente iconos
+                                continue
+                        except ValueError:
+                            pass
+                    
+                    # Filtrar por nombre de archivo
+                    if any(skip in src.lower() for skip in ['icon', 'logo', 'avatar', 'button', 'banner']):
+                        continue
+                    
+                    full_url = urljoin(self.base_url, src)
+                    if self.is_valid_image_url(full_url):
+                        images.append(full_url)
+                        
+                        # Limitar a máximo 2 imágenes
+                        if len(images) >= 2:
+                            break
+            
+            if len(images) >= 2:
                 break
-        else:
-            # Fallback: título de la página
-            title = response.css('title::text').get()
-            if title:
-                # Limpiar título (remover nombre del sitio)
-                if ' | ' in title:
-                    title = title.split(' | ')[0]
-                elif ' - ' in title:
-                    title = title.split(' - ')[0]
-                item['titulo'] = title.strip()
-            else:
-                item['titulo'] = "Sin título"
-        
-        # Fecha
-        item['fecha'] = self.extract_date(response)
-        
-        # Contenido
-        content_selectors = [
-            '.entry-content',
-            '.post-content',
-            '.article-content',
-            '.content',
-            '.text-content',
-            '.main-content',
-            'article .content',
-            'article .text',
-            '.article-body',
-            '.post-body',
-            '.entry-body',
-            'main article',
-            '.single-content',
-            '.post-single-content',
-            '.single-post-content'
-        ]
-        
-        content = ""
-        for selector in content_selectors:
-            content_elements = response.css(selector + ' p::text').getall()
-            if content_elements:
-                content = ' '.join([elem.strip() for elem in content_elements if elem.strip()])
-                if len(content) > 100:
-                    break
-        
-        item['contenido'] = content if content else "Contenido no encontrado"
-        
-        # Resumen
-        item['resumen'] = self.extract_summary(response, content)
-        
-        # Categoría
-        item['categoria'] = self.extract_category(response)
-        
-        # Autor
-        item['autor'] = self.extract_author(response)
-        
-        # Tags
-        item['tags'] = self.extract_tags(response)
-        
-        # URL
-        item['url'] = response.url
-        
-        # Imágenes
-        item['imagenes'] = self.extract_images(response)
-        
-        # Fuente
-        item['fuente'] = 'Sin Fronteras'
-        
-        # Estadísticas del contenido
-        if content:
-            item['caracteres_contenido'] = len(content)
-            item['palabras_contenido'] = len(content.split())
-        else:
-            item['caracteres_contenido'] = 0
-            item['palabras_contenido'] = 0
-        
-        yield item
+                
+        return images
     
-    def is_article_page(self, response):
-        """Verifica si la página es un artículo"""
-        # Verificar que tenga título
-        title = response.css('h1::text').get()
-        if not title or len(title.strip()) < 10:
-            return False
-        
-        # Verificar que tenga contenido
-        content = response.css('article p::text, .content p::text').getall()
-        if not content or len(' '.join(content)) < 100:
-            return False
-        
-        return True
+    def is_valid_image_url(self, url):
+        """Verifica si la URL es una imagen válida"""
+        image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']
+        return any(ext in url.lower() for ext in image_extensions)
     
-    def extract_date(self, response):
-        """Extrae la fecha del artículo"""
-        # Meta tags de fecha
-        meta_selectors = [
-            'meta[property="article:published_time"]::attr(content)',
-            'meta[property="article:modified_time"]::attr(content)',
-            'meta[name="publish_date"]::attr(content)',
-            'meta[name="date"]::attr(content)',
-            'meta[name="pubdate"]::attr(content)',
-        ]
+    def clean_text(self, text):
+        """Limpia y normaliza el texto"""
+        if not text:
+            return ""
+        # Eliminar espacios extra y caracteres especiales
+        text = re.sub(r'\s+', ' ', text.strip())
+        text = re.sub(r'[\r\n\t]', ' ', text)
+        text = re.sub(r'[^\w\s\-.,;:!?()áéíóúüñÁÉÍÓÚÜÑ]', ' ', text)
+        return text.strip()
+    
+    def extract_date_time(self, soup):
+        """Extrae fecha y hora del artículo"""
+        fecha = ""
+        hora = ""
         
-        for selector in meta_selectors:
-            date = response.css(selector).get()
-            if date:
-                return date
-        
-        # Selectores de elementos de fecha
+        # Múltiples selectores para fecha
         date_selectors = [
-            '.entry-date::text',
-            '.post-date::text',
-            '.article-date::text',
-            '.published::text',
-            '.date::text',
-            '.fecha::text',
-            'time::text',
-            '.entry-meta .date::text',
-            '.post-meta .date::text',
-            '.article-meta .date::text',
-            '.single-post-date::text',
-            '.post-single-date::text'
+            'time[datetime]',
+            '.entry-date',
+            '.post-date',
+            '.published',
+            '.date',
+            '.post-meta time',
+            '.entry-meta time',
+            '[datetime]'
         ]
         
         for selector in date_selectors:
-            date = response.css(selector).get()
-            if date and len(date.strip()) > 5:
-                return date.strip()
-        
-        return "Fecha no encontrada"
-    
-    def extract_summary(self, response, content):
-        """Extrae o genera un resumen del artículo"""
-        # Meta description
-        meta_desc = response.css('meta[name="description"]::attr(content)').get()
-        if meta_desc and len(meta_desc.strip()) > 20:
-            return meta_desc.strip()
-        
-        # Open Graph description
-        og_desc = response.css('meta[property="og:description"]::attr(content)').get()
-        if og_desc and len(og_desc.strip()) > 20:
-            return og_desc.strip()
-        
-        # Extractos específicos
-        excerpt_selectors = [
-            '.excerpt::text',
-            '.summary::text',
-            '.lead::text',
-            '.intro::text',
-            '.article-summary::text',
-            '.post-excerpt::text'
-        ]
-        
-        for selector in excerpt_selectors:
-            excerpt = response.css(selector).get()
-            if excerpt and len(excerpt.strip()) > 20:
-                return excerpt.strip()
-        
-        # Generar resumen del contenido
-        if content and len(content) > 200:
-            # Tomar las primeras 2-3 oraciones
-            sentences = re.split(r'[.!?]+', content)
-            summary_sentences = []
-            char_count = 0
-            
-            for sentence in sentences[:4]:
-                sentence = sentence.strip()
-                if sentence and len(sentence) > 10:
-                    if char_count + len(sentence) < 300:
-                        summary_sentences.append(sentence)
-                        char_count += len(sentence)
-                    else:
-                        break
-            
-            if summary_sentences:
-                return '. '.join(summary_sentences) + '.'
-        
-        return "Resumen no disponible"
-    
-    def extract_category(self, response):
-        """Extrae la categoría del artículo"""
-        # Buscar en breadcrumbs
-        breadcrumb_selectors = [
-            '.breadcrumb a:last-child::text',
-            '.breadcrumbs a:last-child::text',
-            '.breadcrumb li:last-child::text',
-            '.breadcrumbs li:last-child::text'
-        ]
-        
-        for selector in breadcrumb_selectors:
-            cat = response.css(selector).get()
-            if cat and cat.strip().lower() not in ['inicio', 'home', 'principal']:
-                return cat.strip()
-        
-        # Selectores específicos de categoría
-        category_selectors = [
-            '.category a::text',
-            '.categories a::text',
-            '.cat-links a::text',
-            '.entry-category::text',
-            '.post-category::text',
-            '.article-category::text',
-            '.section::text',
-            '.meta-category::text'
-        ]
-        
-        for selector in category_selectors:
-            cat = response.css(selector).get()
-            if cat and cat.strip():
-                return cat.strip()
-        
-        # Extraer de la URL
-        url = response.url
-        url_categories = ['actualidad', 'deportes', 'economia', 'politica', 'local', 'nacional', 'internacional', 'puno', 'juliaca', 'region', 'sociedad', 'cultura', 'tecnologia']
-        for cat in url_categories:
-            if f'/{cat}/' in url.lower():
-                return cat.title()
-        
-        return "Sin categoría"
-    
-    def extract_author(self, response):
-        """Extrae el autor del artículo"""
-        # Meta tags
-        meta_author = response.css('meta[name="author"]::attr(content)').get()
-        if meta_author:
-            return meta_author.strip()
-        
-        # Selectores de autor
-        author_selectors = [
-            '.author a::text',
-            '.by-author::text',
-            '.entry-author::text',
-            '.post-author::text',
-            '.article-author::text',
-            '.author-name::text',
-            '.byline::text',
-            '.meta-author::text',
-            '.writer::text'
-        ]
-        
-        for selector in author_selectors:
-            author = response.css(selector).get()
-            if author and len(author.strip()) < 100:
-                # Limpiar prefijos comunes
-                author = re.sub(r'^(por|by|autor|escrito por)[:|\s]+', '', author.strip(), flags=re.IGNORECASE)
-                if author:
-                    return author
-        
-        return "Autor no especificado"
-    
-    def extract_tags(self, response):
-        """Extrae los tags del artículo"""
-        tag_selectors = [
-            '.tags a::text',
-            '.tag-links a::text',
-            '.entry-tags a::text',
-            '.post-tags a::text',
-            '.article-tags a::text',
-            '.hashtags a::text',
-            '.keywords a::text'
-        ]
-        
-        tags = []
-        for selector in tag_selectors:
-            tag_elements = response.css(selector).getall()
-            for tag in tag_elements:
-                tag = tag.strip()
-                if tag and tag not in tags:
-                    tags.append(tag)
-        
-        # Buscar en meta keywords
-        meta_keywords = response.css('meta[name="keywords"]::attr(content)').get()
-        if meta_keywords:
-            keywords = meta_keywords.split(',')
-            tags.extend([k.strip() for k in keywords if k.strip()])
-        
-        return ', '.join(tags[:10]) if tags else "Sin tags"
-    
-    def extract_images(self, response):
-        """Extrae información de imágenes del artículo"""
-        images = []
-        
-        # Buscar imágenes en el contenido principal
-        img_elements = response.css('article img[src], .content img[src], .entry-content img[src]')
-        
-        for img in img_elements:
-            src = img.css('::attr(src)').get()
-            if src:
-                # Convertir a URL absoluta
-                full_url = urljoin(response.url, src)
-                
-                # Filtrar imágenes muy pequeñas o de interface
-                width = img.css('::attr(width)').get()
-                height = img.css('::attr(height)').get()
-                
-                if width and height:
+            date_elem = soup.select_one(selector)
+            if date_elem:
+                datetime_attr = date_elem.get('datetime') or date_elem.get('content')
+                if datetime_attr:
                     try:
-                        w, h = int(width), int(height)
-                        if w < 100 or h < 100:  # Muy pequeñas, probablemente iconos
-                            continue
-                    except ValueError:
+                        dt = datetime.fromisoformat(datetime_attr.replace('Z', '+00:00'))
+                        fecha = dt.strftime('%Y-%m-%d')
+                        hora = dt.strftime('%H:%M:%S')
+                        break
+                    except:
                         pass
                 
-                # Filtrar por nombre de archivo
-                if any(skip in src.lower() for skip in ['icon', 'logo', 'avatar', 'button', 'banner']):
-                    continue
-                
-                alt = img.css('::attr(alt)').get() or ''
-                title = img.css('::attr(title)').get() or ''
-                
-                images.append({
-                    'url': full_url,
-                    'alt': alt.strip(),
-                    'title': title.strip()
-                })
+                # Si no hay datetime, extraer texto
+                date_text = self.clean_text(date_elem.get_text())
+                if date_text:
+                    fecha = self.parse_date_text(date_text)
+                    break
         
-        return str(images) if images else "Sin imágenes"
+        return fecha, hora
+    
+    def parse_date_text(self, date_text):
+        """Parsea texto de fecha a formato estándar"""
+        if not date_text:
+            return datetime.now().strftime('%Y-%m-%d')
+        
+        # Patrones comunes en español
+        months = {
+            'enero': '01', 'febrero': '02', 'marzo': '03', 'abril': '04',
+            'mayo': '05', 'junio': '06', 'julio': '07', 'agosto': '08',
+            'septiembre': '09', 'octubre': '10', 'noviembre': '11', 'diciembre': '12'
+        }
+        
+        date_text = date_text.lower()
+        for month_name, month_num in months.items():
+            if month_name in date_text:
+                # Buscar día y año
+                numbers = re.findall(r'\d+', date_text)
+                if len(numbers) >= 2:
+                    day = numbers[0].zfill(2)
+                    year = numbers[-1] if len(numbers[-1]) == 4 else f"20{numbers[-1]}"
+                    return f"{year}-{month_num}-{day}"
+        
+        return datetime.now().strftime('%Y-%m-%d')
+    
+    def extract_article_data(self, article_url):
+        """Extrae todos los datos de un artículo específico"""
+        try:
+            response = self.get_page(article_url)
+            if not response:
+                return None
+                
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Extraer título
+            title_selectors = [
+                'h1.entry-title',
+                'h1.post-title', 
+                'h1.article-title',
+                '.single-title h1',
+                'article h1',
+                'h1',
+                '.title h1',
+                '.entry-header h1'
+            ]
+            title = ""
+            for selector in title_selectors:
+                title_elem = soup.select_one(selector)
+                if title_elem:
+                    title = self.clean_text(title_elem.get_text())
+                    break
+            
+            # Extraer fecha y hora
+            fecha, hora = self.extract_date_time(soup)
+            
+            # Extraer resumen/excerpt
+            summary_selectors = [
+                '.entry-excerpt',
+                '.post-excerpt',
+                '.excerpt',
+                '.lead',
+                '.summary',
+                'meta[name="description"]'
+            ]
+            resumen = ""
+            for selector in summary_selectors:
+                if selector.startswith('meta'):
+                    summary_elem = soup.select_one(selector)
+                    if summary_elem:
+                        resumen = self.clean_text(summary_elem.get('content', ''))
+                        break
+                else:
+                    summary_elem = soup.select_one(selector)
+                    if summary_elem:
+                        resumen = self.clean_text(summary_elem.get_text())
+                        break
+            
+            # Extraer contenido principal
+            content_selectors = [
+                '.entry-content',
+                '.post-content',
+                '.article-content',
+                '.content',
+                'article .text',
+                '.single-content',
+                '.post-body'
+            ]
+            contenido = ""
+            for selector in content_selectors:
+                content_elem = soup.select_one(selector)
+                if content_elem:
+                    # Eliminar elementos no deseados
+                    for unwanted in content_elem.find_all(['script', 'style', 'nav', 'aside', 'footer']):
+                        unwanted.decompose()
+                    contenido = self.clean_text(content_elem.get_text())
+                    break
+            
+            # Extraer categoría
+            category_selectors = [
+                '.category',
+                '.post-category',
+                '.entry-category',
+                '.cat-links a',
+                '[rel="category"]',
+                '.breadcrumb a',
+                '.post-categories a'
+            ]
+            categoria = ""
+            for selector in category_selectors:
+                cat_elems = soup.select(selector)
+                if cat_elems:
+                    categories = [self.clean_text(cat.get_text()) for cat in cat_elems]
+                    categoria = ", ".join(categories)
+                    break
+            
+            # Extraer autor
+            author_selectors = [
+                '.author',
+                '.post-author',
+                '.entry-author',
+                '[rel="author"]',
+                '.byline',
+                '.writer',
+                '.author-name'
+            ]
+            autor = ""
+            for selector in author_selectors:
+                author_elem = soup.select_one(selector)
+                if author_elem:
+                    autor = self.clean_text(author_elem.get_text())
+                    break
+            
+            # Extraer tags
+            tag_selectors = [
+                '.tags a',
+                '.post-tags a',
+                '.entry-tags a',
+                '[rel="tag"]'
+            ]
+            tags = []
+            for selector in tag_selectors:
+                tag_elems = soup.select(selector)
+                if tag_elems:
+                    tags = [self.clean_text(tag.get_text()) for tag in tag_elems]
+                    break
+            
+            # Extraer imágenes
+            images = self.extract_images(soup)
+            
+            return {
+                'titulo': title,
+                'fecha': fecha,
+                'hora': hora,
+                'resumen': resumen,
+                'contenido': contenido,
+                'categoria': categoria,
+                'autor': autor,
+                'tags': ", ".join(tags) if tags else "",
+                'url': article_url,
+                'fecha_extraccion': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'imagenes': ", ".join(images) if images else "",
+                'fuente': 'Sin Fronteras',
+                'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
+            
+        except Exception as e:
+            print(f"Error extrayendo artículo {article_url}: {str(e)}")
+            return None
+    
+    def get_article_links_from_page(self, page_url):
+        """Extrae todos los enlaces de artículos de una página"""
+        try:
+            response = self.get_page(page_url)
+            if not response:
+                return []
+                
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Selectores comunes para enlaces de artículos
+            article_selectors = [
+                'article a[href]',
+                '.post a[href]',
+                '.entry a[href]',
+                '.news-item a[href]',
+                'h2 a[href]',
+                'h3 a[href]',
+                '.title a[href]',
+                '.headline a[href]',
+                '.post-title a[href]',
+                '.entry-title a[href]'
+            ]
+            
+            links = set()
+            
+            # Buscar enlaces con diferentes selectores
+            for selector in article_selectors:
+                elements = soup.select(selector)
+                for elem in elements:
+                    href = elem.get('href')
+                    if href:
+                        full_url = urljoin(self.base_url, href)
+                        # Filtrar solo URLs que parezcan artículos
+                        if self.is_article_url(full_url):
+                            links.add(full_url)
+            
+            # También buscar todos los enlaces internos
+            all_links = soup.find_all('a', href=True)
+            for link in all_links:
+                href = link.get('href')
+                if href:
+                    full_url = urljoin(self.base_url, href)
+                    if self.is_article_url(full_url):
+                        links.add(full_url)
+            
+            return list(links)
+            
+        except Exception as e:
+            print(f"Error obteniendo enlaces de {page_url}: {str(e)}")
+            return []
+    
+    def is_article_url(self, url):
+        """Determina si una URL es probablemente un artículo"""
+        if not url.startswith(self.base_url):
+            return False
+            
+        # Excluir URLs que no son artículos
+        exclude_patterns = [
+            '/wp-admin/', '/wp-content/', '/wp-includes/',
+            '/feed/', '/rss/', '/sitemap',
+            '.jpg', '.png', '.gif', '.pdf', '.css', '.js',
+            '/page/', '/category/', '/tag/', '/author/',
+            '/search/', '/contact/', '/about/',
+            '#', 'javascript:', 'mailto:',
+            '/wp-login', '/wp-json', '/xmlrpc'
+        ]
+        
+        for pattern in exclude_patterns:
+            if pattern in url.lower():
+                return False
+        
+        return True
+    
+    def get_pagination_urls(self, soup):
+        """Extrae URLs de paginación"""
+        pagination_urls = set()
+        
+        # Selectores comunes para paginación
+        pagination_selectors = [
+            '.pagination a[href]',
+            '.page-numbers a[href]',
+            '.pager a[href]',
+            '.nav-links a[href]',
+            'a[rel="next"]',
+            'a[rel="prev"]',
+            '.pagination-next a[href]',
+            '.pagination-prev a[href]'
+        ]
+        
+        for selector in pagination_selectors:
+            elements = soup.select(selector)
+            for elem in elements:
+                href = elem.get('href')
+                if href:
+                    full_url = urljoin(self.base_url, href)
+                    pagination_urls.add(full_url)
+        
+        return list(pagination_urls)
+    
+    def discover_all_pages(self):
+        """Descubre TODAS las páginas del sitio web"""
+        print("🔍 Descubriendo TODAS las páginas del sitio...")
+        
+        pages_to_visit = [self.base_url]
+        visited_pages = set()
+        all_article_urls = set()
+        
+        while pages_to_visit:
+            current_page = pages_to_visit.pop(0)
+            
+            if current_page in visited_pages:
+                continue
+                
+            print(f"📄 Explorando: {current_page}")
+            visited_pages.add(current_page)
+            
+            try:
+                response = self.get_page(current_page)
+                if not response:
+                    continue
+                    
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                # Obtener enlaces de artículos de esta página
+                article_links = self.get_article_links_from_page(current_page)
+                all_article_urls.update(article_links)
+                print(f"  📰 Encontrados {len(article_links)} artículos en esta página")
+                
+                # Obtener TODOS los enlaces de paginación
+                pagination_links = self.get_pagination_urls(soup)
+                for link in pagination_links:
+                    if link not in visited_pages:
+                        pages_to_visit.append(link)
+                
+                # Buscar enlaces internos adicionales
+                all_links = soup.find_all('a', href=True)
+                for link in all_links:
+                    href = link.get('href')
+                    if href:
+                        full_url = urljoin(self.base_url, href)
+                        if (full_url.startswith(self.base_url) and 
+                            full_url not in visited_pages and 
+                            full_url not in pages_to_visit and
+                            not self.is_article_url(full_url)):
+                            pages_to_visit.append(full_url)
+                
+                time.sleep(1)  # Pausa entre requests
+                
+            except Exception as e:
+                print(f"Error explorando {current_page}: {str(e)}")
+                continue
+        
+        print(f"✅ Descubrimiento completado. {len(all_article_urls)} artículos encontrados")
+        return list(all_article_urls)
+    
+    def scrape_article(self, url):
+        """Scraper individual para un artículo con thread safety"""
+        with self.lock:
+            if url in self.processed_urls:
+                return None
+            self.processed_urls.add(url)
+        
+        print(f"📖 Extrayendo: {url}")
+        article_data = self.extract_article_data(url)
+        
+        if article_data and article_data['titulo']:
+            with self.lock:
+                self.all_news.append(article_data)
+            print(f"✅ Extraído: {article_data['titulo'][:50]}...")
+            return article_data
+        else:
+            print(f"❌ No se pudo extraer: {url}")
+            return None
+    
+    def scrape_news(self, max_workers=5):
+        """Extrae TODAS las noticias del sitio web"""
+        print("🚀 Iniciando scraping COMPLETO de Sin Fronteras...")
+        
+        # Descubrir TODAS las páginas y artículos
+        all_article_urls = self.discover_all_pages()
+        
+        if not all_article_urls:
+            print("❌ No se encontraron artículos")
+            return []
+        
+        print(f"📊 Total de artículos a procesar: {len(all_article_urls)}")
+        
+        # Procesar TODOS los artículos con threading
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_url = {executor.submit(self.scrape_article, url): url for url in all_article_urls}
+            
+            completed = 0
+            for future in as_completed(future_to_url):
+                completed += 1
+                if completed % 10 == 0:
+                    print(f"🔄 Progreso: {completed}/{len(all_article_urls)} artículos procesados")
+                
+                # Pausa entre requests
+                time.sleep(0.5)
+        
+        print(f"🎉 Scraping completado! {len(self.all_news)} noticias extraídas")
+        return self.all_news
+    
+    def save_to_csv(self, filename=None):
+        """Guarda los datos en formato CSV"""
+        if not filename:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"{self.data_folder}/sinfronteras_{timestamp}.csv"
+        
+        if self.all_news:
+            df = pd.DataFrame(self.all_news)
+            df.to_csv(filename, index=False, encoding='utf-8-sig')
+            print(f"✅ Datos guardados en {filename}")
+            return filename
+        else:
+            print("❌ No hay datos para guardar")
+            return None
+    
+    def save_to_json(self, filename=None):
+        """Guarda los datos en formato JSON"""
+        if not filename:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"{self.data_folder}/sinfronteras_{timestamp}.json"
+        
+        if self.all_news:
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump(self.all_news, f, ensure_ascii=False, indent=2)
+            print(f"✅ Datos guardados en {filename}")
+            return filename
+        else:
+            print("❌ No hay datos para guardar")
+            return None
+
+# Función principal para ejecutar
+def main():
+    print("🚀 Iniciando scraping de Sin Fronteras...")
+    print("=" * 50)
+    
+    scraper = SinFronterasLocalScraper()
+    
+    # Realizar scraping COMPLETO
+    news_data = scraper.scrape_news(max_workers=5)
+    
+    if news_data:
+        # Guardar en CSV y JSON
+        csv_file = scraper.save_to_csv()
+        json_file = scraper.save_to_json()
+        
+        print(f"\n🎉 ¡Scraping completado exitosamente!")
+        print(f"📊 Total de noticias extraídas: {len(news_data)}")
+        print(f"📁 Archivos guardados:")
+        print(f"   - CSV: {csv_file}")
+        print(f"   - JSON: {json_file}")
+        
+        # Mostrar estadísticas
+        print(f"\n📈 Estadísticas:")
+        print(f"   - Promedio de caracteres por artículo: {sum(len(n.get('contenido', '')) for n in news_data) // len(news_data)}")
+        print(f"   - Promedio de palabras por artículo: {sum(len(n.get('contenido', '').split()) for n in news_data) // len(news_data)}")
+        
+        # Mostrar categorías encontradas
+        categorias = set()
+        for news in news_data:
+            if news.get('categoria'):
+                categorias.add(news['categoria'])
+        if categorias:
+            print(f"   - Categorías encontradas: {', '.join(list(categorias)[:5])}")
+        
+        return csv_file, json_file
+    else:
+        print("❌ No se pudieron extraer noticias")
+        return None, None
+
+    def save_to_files(self, articles, csv_file, json_file):
+        """Guardar artículos en archivos CSV y JSON"""
+        import json
+
+        import pandas as pd
+
+        # Asegurar que el directorio existe
+        os.makedirs(os.path.dirname(csv_file), exist_ok=True)
+        
+        # Guardar CSV
+        df = pd.DataFrame(articles)
+        df.to_csv(csv_file, index=False, encoding='utf-8')
+        
+        # Guardar JSON
+        with open(json_file, 'w', encoding='utf-8') as f:
+            json.dump(articles, f, ensure_ascii=False, indent=2)
+
+if __name__ == "__main__":
+    main()

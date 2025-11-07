@@ -1,336 +1,365 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes y Estadísticas - BizNews</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Free HTML Templates" name="keywords">
-    <meta content="Free HTML Templates" name="description">
-
-    <!-- Favicon -->
-    <link href="img/favicon.ico" rel="icon">
-
-    <!-- Google Web Fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">  
-
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css" rel="stylesheet">
-
-    <!-- Libraries Stylesheet -->
-    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
-
-    <!-- Customized Bootstrap Stylesheet -->
-    <link href="css/style.css" rel="stylesheet">
     
-    <!-- Reportes CSS -->
-    <link href="css/reportes.css" rel="stylesheet">
+    <!-- Meta Tags -->
+    <meta name="description" content="Explora reportes y estadísticas detalladas de noticias en BizNews. Gráficos interactivos y análisis de datos">
+    <meta name="keywords" content="reportes, estadísticas, gráficos, análisis, noticias, datos">
+    <meta name="author" content="BizNews">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Global CSS -->
+    <link href="css/global.css" rel="stylesheet">
+    <link href="css/reportes.css" rel="stylesheet">
 </head>
-
 <body>
-    <!-- Topbar Start -->
-    <div class="container-fluid d-none d-lg-block">
-        <div class="row align-items-center bg-dark px-lg-5">
-            <div class="col-lg-9">
-                <nav class="navbar navbar-expand-sm bg-dark p-0">
-                    <ul class="navbar-nav ml-n2">
-                        <li class="nav-item border-right border-secondary">
-                            <a class="nav-link text-body small" href="#">Monday, January 1, 2045</a>
-                        </li>
-                        <li class="nav-item border-right border-secondary">
-                            <a class="nav-link text-body small" href="#">Advertise</a>
-                        </li>
-                        <li class="nav-item border-right border-secondary">
-                            <a class="nav-link text-body small" href="#">Contact</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-body small" href="#">Login</a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-            <div class="col-lg-3 text-right d-none d-md-block">
-                <nav class="navbar navbar-expand-sm bg-dark p-0">
-                    <ul class="navbar-nav ml-auto mr-n2">
-                        <li class="nav-item">
-                            <a class="nav-link text-body" href="#"><small class="fab fa-twitter"></small></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-body" href="#"><small class="fab fa-facebook-f"></small></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-body" href="#"><small class="fab fa-linkedin-in"></small></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-body" href="#"><small class="fab fa-instagram"></small></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-body" href="#"><small class="fab fa-google-plus-g"></small></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-body" href="#"><small class="fab fa-youtube"></small></a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-        <div class="row align-items-center bg-white py-3 px-lg-5">
-            <div class="col-lg-4">
-                <a href="index.html" class="navbar-brand p-0 d-none d-lg-block">
-                    <h1 class="m-0 display-4 text-uppercase text-primary">Biz<span class="text-secondary font-weight-normal">News</span></h1>
-                </a>
-            </div>
-            <div class="col-lg-8 text-center text-lg-right">
-                <div class="bg-primary text-white p-3 rounded">
-                    <h5 class="mb-0">BizNews - Reportes y Estadísticas</h5>
-                    <small>Análisis de datos en tiempo real</small>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Topbar End -->
-
-
-    <!-- Navbar Start -->
-    <div class="container-fluid p-0">
-        <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-2 py-lg-0 px-lg-5">
-            <a href="index.html" class="navbar-brand d-block d-lg-none">
-                <h1 class="m-0 display-4 text-uppercase text-primary">Biz<span class="text-secondary font-weight-normal">News</span></h1>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-newspaper"></i>
+                BizNews
             </a>
-            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse justify-content-between px-0 px-lg-3" id="navbarCollapse">
-                <div class="navbar-nav mr-auto py-0">
-                    <a href="index.html" class="nav-item nav-link">Portada</a>
-                    <a href="fuentes.html" class="nav-item nav-link">Fuentes</a>
-                    <a href="categorias.html" class="nav-item nav-link">Categorías</a>
-                    <a href="reportes.html" class="nav-item nav-link active">Reportes</a>
-                    <a href="contact.html" class="nav-item nav-link">Contacto</a>
-                </div>
-                <div class="input-group ml-auto d-none d-lg-flex" style="width: 100%; max-width: 300px;">
-                    <input type="text" class="form-control border-0" placeholder="Palabra clave">
-                    <div class="input-group-append">
-                        <button class="input-group-text bg-primary text-dark border-0 px-3">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </div>
-                </div>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="fas fa-home"></i>
+                            Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="fuentes.html">
+                            <i class="fas fa-rss"></i>
+                            Fuentes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="categorias.html">
+                            <i class="fas fa-tags"></i>
+                            Categorías
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="reportes.html">
+                            <i class="fas fa-chart-bar"></i>
+                            Reportes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="busqueda.html">
+                            <i class="fas fa-search"></i>
+                            Búsqueda
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">
+                            <i class="fas fa-envelope"></i>
+                            Contacto
+                        </a>
+                    </li>
+                </ul>
             </div>
-        </nav>
-    </div>
-    <!-- Navbar End -->
+        </div>
+    </nav>
 
-
-    <!-- Breaking News Start -->
-    <div class="container-fluid mt-5 pt-3">
+    <!-- Hero Section -->
+    <div class="hero-section">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-12">
-                    <div class="d-flex justify-content-between flex-column flex-md-row align-items-center">
-                        <div class="mb-3 mb-md-0">
-                            <h4 class="m-0 text-uppercase font-weight-bold">Reportes y Estadísticas</h4>
-                        </div>
-                        <div class="d-flex">
-                            <small class="mr-2 text-muted"><i class="fa fa-calendar mr-1"></i>Actualizado: <span id="last-update"></span></small>
-                            <button class="btn btn-sm btn-outline-primary ml-3" onclick="refreshReportes()">
-                                <i class="fa fa-refresh mr-1"></i>Actualizar
-                            </button>
+                <div class="col-lg-8">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Reportes y Estadísticas</h1>
+                        <p class="hero-subtitle">Análisis detallado de noticias con gráficos interactivos y métricas en tiempo real</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="hero-stats">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <div class="stat-number" id="total-news-stats">-</div>
+                                    <div class="stat-label">Noticias</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <div class="stat-number" id="total-sources-stats">-</div>
+                                    <div class="stat-label">Fuentes</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <div class="stat-number" id="total-categories-stats">-</div>
+                                    <div class="stat-label">Categorías</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Breaking News End -->
 
-
-    <!-- Reportes Section Start -->
-    <div class="container-fluid mt-5 pt-3">
-        <div class="container">
-            <div class="row">
-                <!-- Gráfica 1: Noticias por Fuente -->
-                <div class="col-lg-6 mb-4">
-                    <div class="bg-white border p-4">
-                        <h5 class="mb-3 text-uppercase font-weight-bold">Noticias por Fuente</h5>
-                        <div class="chart-container">
-                            <canvas id="fuentesChart"></canvas>
+    <!-- Main Content -->
+    <div class="container main-content">
+        <!-- Filters Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-filter"></i>
+                            Filtros Temporales
+                        </h2>
+                        <p class="section-subtitle">Selecciona un período para analizar los datos</p>
+                    </div>
+                    <div class="p-4">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Período</label>
+                                <select class="form-select" id="timeFilter">
+                                    <option value="all">Todos los tiempos</option>
+                                    <option value="today">Hoy</option>
+                                    <option value="week">Esta semana</option>
+                                    <option value="month">Este mes</option>
+                                    <option value="year">Este año</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Fuente</label>
+                                <select class="form-select" id="sourceFilter">
+                                    <option value="all">Todas las fuentes</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Categoría</label>
+                                <select class="form-select" id="categoryFilter">
+                                    <option value="all">Todas las categorías</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3 d-flex align-items-end">
+                                <button class="btn btn-primary w-100" id="applyFilters">
+                                    <i class="fas fa-sync-alt"></i>
+                                    Actualizar Datos
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Gráfica 2: Noticias por Categoría -->
-                <div class="col-lg-6 mb-4">
-                    <div class="bg-white border p-4">
-                        <h5 class="mb-3 text-uppercase font-weight-bold">Noticias por Categoría</h5>
+        <!-- Statistics Summary -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-chart-line"></i>
+                            Resumen Estadístico
+                        </h2>
+                        <p class="section-subtitle">Métricas clave del período seleccionado</p>
+                    </div>
+                    <div class="p-4 row" id="stats-summary">
+                         <!-- El contenido se generará dinámicamente -->
+                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row">
+            <!-- Chart 1: News by Source -->
+            <div class="col-lg-6 mb-4">
+                <div class="content-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Noticias por Fuente
+                        </h3>
+                        <p class="section-subtitle">Distribución de noticias según la fuente</p>
+                    </div>
+                    <div class="p-4">
                         <div class="chart-container">
-                            <canvas id="categoriasChart"></canvas>
+                            <canvas id="newsBySourceChart"></canvas>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Gráfica 3: Noticias por Mes -->
-                <div class="col-lg-6 mb-4">
-                    <div class="bg-white border p-4">
-                        <h5 class="mb-3 text-uppercase font-weight-bold">Noticias por Mes</h5>
+            <!-- Chart 2: News by Category -->
+            <div class="col-lg-6 mb-4">
+                <div class="content-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Noticias por Categoría
+                        </h3>
+                        <p class="section-subtitle">Distribución de noticias por categoría</p>
+                    </div>
+                    <div class="p-4">
                         <div class="chart-container">
-                            <canvas id="mensualChart"></canvas>
+                            <canvas id="newsByCategoryChart"></canvas>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Gráfica 4: Noticias por Día de la Semana -->
-                <div class="col-lg-6 mb-4">
-                    <div class="bg-white border p-4">
-                        <h5 class="mb-3 text-uppercase font-weight-bold">Noticias por Día de la Semana</h5>
+            <!-- Chart 3: News by Month -->
+            <div class="col-lg-6 mb-4">
+                <div class="content-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-chart-line"></i>
+                            Noticias por Mes
+                        </h3>
+                        <p class="section-subtitle">Evolución temporal de las noticias</p>
+                    </div>
+                    <div class="p-4">
                         <div class="chart-container">
-                            <canvas id="diasChart"></canvas>
+                            <canvas id="newsByMonthChart"></canvas>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Gráfica 5: Top 10 Noticias Más Leídas -->
-                <div class="col-lg-12 mb-4">
-                    <div class="bg-white border p-4">
-                        <h5 class="mb-3 text-uppercase font-weight-bold">Top 10 Noticias Más Leídas</h5>
-                        <div class="chart-container-large">
+            <!-- Chart 4: News by Day of Week -->
+            <div class="col-lg-6 mb-4">
+                <div class="content-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-chart-area"></i>
+                            Noticias por Día de la Semana
+                        </h3>
+                        <p class="section-subtitle">Distribución semanal de noticias</p>
+                    </div>
+                    <div class="p-4">
+                        <div class="chart-container">
+                            <canvas id="newsByDayChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart 5: Top News -->
+            <div class="col-12 mb-4">
+                <div class="content-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-trophy"></i>
+                            Top 10 Noticias Más Relevantes
+                        </h3>
+                        <p class="section-subtitle">Noticias con mayor impacto y relevancia</p>
+                    </div>
+                    <div class="p-4">
+                        <div class="chart-container">
                             <canvas id="topNewsChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Resumen Estadístico -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="bg-white border p-4">
-                        <h5 class="mb-3 text-uppercase font-weight-bold">Resumen Estadístico</h5>
-                        <div class="row" id="stats-summary">
-                            <div class="col-md-3 text-center mb-3">
-                                <div class="bg-primary text-white p-3 rounded">
-                                    <h3 class="mb-0" id="total-news">0</h3>
-                                    <small>Total Noticias</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3 text-center mb-3">
-                                <div class="bg-success text-white p-3 rounded">
-                                    <h3 class="mb-0" id="total-fuentes">0</h3>
-                                    <small>Fuentes</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3 text-center mb-3">
-                                <div class="bg-info text-white p-3 rounded">
-                                    <h3 class="mb-0" id="total-categorias">0</h3>
-                                    <small>Categorías</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3 text-center mb-3">
-                                <div class="bg-warning text-white p-3 rounded">
-                                    <h3 class="mb-0" id="avg-per-day">0</h3>
-                                    <small>Promedio/Día</small>
-                                </div>
-                            </div>
+        <!-- Data Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-table"></i>
+                            Datos Detallados
+                        </h3>
+                        <p class="section-subtitle">Tabla con información detallada de las noticias</p>
+                    </div>
+                    <div class="p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="newsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Título</th>
+                                        <th>Fuente</th>
+                                        <th>Categoría</th>
+                                        <th>Fecha</th>
+                                        <th>Imágenes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="newsTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Cargando...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Reportes Section End -->
 
-
-    <!-- Footer Start -->
-    <div class="container-fluid bg-dark pt-5 px-sm-3 px-md-5 mt-5">
-        <div class="row py-4">
-            <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-light mb-4">Get In Touch</h4>
-                <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>123 Street, New York, USA</p>
-                <p class="mb-2"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
-                <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
-                <h6 class="text-uppercase text-light mt-4 mb-3">Follow Us</h6>
-                <div class="d-flex justify-content-start">
-                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-twitter"></i></a>
-                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
-                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-instagram"></i></a>
-                    <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-youtube"></i></a>
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-gradient">BizNews</h5>
+                    <p class="mb-0 text-muted">Tu fuente confiable de noticias actualizadas y verificadas.</p>
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-light mb-4">Quick Links</h4>
-                <div class="d-flex flex-column justify-content-start">
-                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>About Us</a>
-                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>Contact Us</a>
-                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>Our Services</a>
-                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>Terms & Condition</a>
-                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>Support</a>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-light mb-4">Newsletter</h4>
-                <p class="mb-4">Voluptua stet stet kasd, sit sea et sit lorem. Diam lorem sed et dolores.</p>
-                <div class="w-100 mb-3">
-                    <div class="input-group">
-                        <input type="text" class="form-control border-light" style="padding: 25px;" placeholder="Your Email">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary px-3">Sign Up</button>
-                        </div>
-                    </div>
-                </div>
-                <i>Lorem sit amet elit. Sed, cursus a nibh.</i>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-light mb-4">Gallery</h4>
-                <div class="row mx-n1">
-                    <div class="col-4 px-1 mb-3">
-                        <a href=""><img class="w-100" src="img/news-110x110-1.jpg" alt=""></a>
-                    </div>
-                    <div class="col-4 px-1 mb-3">
-                        <a href=""><img class="w-100" src="img/news-110x110-2.jpg" alt=""></a>
-                    </div>
-                    <div class="col-4 px-1 mb-3">
-                        <a href=""><img class="w-100" src="img/news-110x110-3.jpg" alt=""></a>
-                    </div>
-                    <div class="col-4 px-1 mb-3">
-                        <a href=""><img class="w-100" src="img/news-110x110-4.jpg" alt=""></a>
-                    </div>
-                    <div class="col-4 px-1 mb-3">
-                        <a href=""><img class="w-100" src="img/news-110x110-5.jpg" alt=""></a>
-                    </div>
-                    <div class="col-4 px-1 mb-3">
-                        <a href=""><img class="w-100" src="img/news-110x110-1.jpg" alt=""></a>
-                    </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-muted">&copy; 2025 BizNews. Todos los derechos reservados.</p>
                 </div>
             </div>
         </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando datos...</span>
+            </div>
+            <p class="mt-3">Procesando datos de reportes...</p>
+        </div>
     </div>
-    <div class="container-fluid py-4 px-sm-3 px-md-5" style="background: #111111;">
-        <p class="m-0 text-center">&copy; <a href="#">Your Site Name</a>. All Rights Reserved. 
-            <a href="https://htmlcodex.com">HTML Codex</a> Distributed By <a href="https://themewagon.com">ThemeWagon</a>
-        </p>
+
+    <!-- Notification Toast -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                <strong class="me-auto">BizNews</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Datos actualizados correctamente
+            </div>
+        </div>
     </div>
-    <!-- Footer End -->
 
-
-    <!-- Back to Top -->
-    <a href="#" class="btn btn-primary btn-square back-to-top"><i class="fa fa-arrow-up"></i></a>
-
-
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
-
-    <!-- Template Javascript -->
-    <script src="js/main.js"></script>
-    
-    <!-- Reportes JavaScript -->
-    <script src="js/reportes.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/reportes.js?v=2.0.1"></script>
 </body>
-
 </html>
