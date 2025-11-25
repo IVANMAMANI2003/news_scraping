@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 
+from ..auth import require_role
 from ..db import get_conn, put_conn
 from ..models import (News, NewsFilters, NewsMetrics, NewsSearchResponse,
                       NewsStats)
@@ -170,9 +171,19 @@ def advanced_search(
     skip: int = Query(0, ge=0, description="Número de registros a omitir"),
     limit: int = Query(20, ge=1, le=100, description="Número de registros a devolver"),
     order: str = Query("desc", regex="^(asc|desc)$", description="Orden de los resultados"),
-    include_stats: bool = Query(False, description="Incluir estadísticas en la respuesta")
+    include_stats: bool = Query(False, description="Incluir estadísticas en la respuesta"),
+    current_user: Optional[dict] = Depends(require_role(["admin", "user", "moderator"], optional=True))
 ):
-    """Búsqueda avanzada de noticias con múltiples filtros"""
+    """
+    Búsqueda avanzada de noticias con múltiples filtros.
+    Requiere autenticación (disponible para todos los usuarios con cuenta).
+    """
+    # Verificar que el usuario esté autenticado
+    if not current_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Se requiere autenticación para acceder a la búsqueda avanzada. Por favor, inicia sesión."
+        )
     conn = get_conn()
     try:
         cur = conn.cursor()
@@ -190,27 +201,29 @@ def advanced_search(
         # Construir cláusula WHERE
         where_sql, params = build_where_clause(filters)
         
-        # Subconsulta unificada
-        unified_query = """
-            (SELECT id, titulo, fecha, hora, anio, mes, dia, dia_semana, resumen, contenido, categoria, autor, keywords, url, dominio, fecha_extraccion, imagen_principal, cantidad_imagenes, tiene_imagenes, fuente, longitud_titulo, longitud_resumen, tipo_contenido, created_at FROM noticias_limpia)
-            UNION ALL
-            (SELECT id, titulo, fecha, CAST(fecha AS time) as hora, EXTRACT(YEAR FROM fecha) as anio, EXTRACT(MONTH FROM fecha) as mes, EXTRACT(DAY FROM fecha) as dia, TRIM(TO_CHAR(fecha, 'Day')) as dia_semana, resumen, NULL as contenido, categoria, NULL as autor, NULL as keywords, url, SUBSTRING(url from 'https?://([^/]+)') as dominio, created_at as fecha_extraccion, imagen as imagen_principal, CASE WHEN imagen IS NOT NULL THEN 1 ELSE 0 END as cantidad_imagenes, (imagen IS NOT NULL) as tiene_imagenes, fuente, LENGTH(titulo) as longitud_titulo, LENGTH(resumen) as longitud_resumen, 'social' as tipo_contenido, created_at FROM social_news)
-        """
-
         # Contar total
-        cur.execute(f"SELECT COUNT(*) FROM ({unified_query}) AS unified_news {where_sql}", params)
+        cur.execute(f"SELECT COUNT(*) FROM noticias_limpia {where_sql}", params)
         total = cur.fetchone()[0]
         
         # Obtener datos
         order_sql = "ASC" if order == "asc" else "DESC"
+        # Ordenar por fecha (más recientes primero), si fecha es NULL usar fecha_extraccion o created_at como respaldo
         cur.execute(
             f"""
-            SELECT * FROM ({unified_query}) AS unified_news
+            SELECT id, titulo, fecha, hora, anio, mes, dia, dia_semana, resumen, contenido, 
+                   categoria, autor, keywords, url, dominio, fecha_extraccion, imagen_principal,
+                   cantidad_imagenes, tiene_imagenes, fuente, longitud_titulo, longitud_resumen,
+                   tipo_contenido, created_at
+            FROM noticias_limpia
             {where_sql}
-            ORDER BY fecha_extraccion {order_sql}, id {order_sql}
-            LIMIT %s OFFSET %s
+            ORDER BY 
+                COALESCE(fecha, fecha_extraccion::date, created_at::date) {order_sql} NULLS LAST,
+                fecha_extraccion {order_sql} NULLS LAST,
+                created_at {order_sql} NULLS LAST,
+                id {order_sql}
+            OFFSET %s LIMIT %s
             """,
-            params + [limit, skip]
+            params + [skip, limit],
         )
         rows = cur.fetchall()
         items = [_row_to_news(r) for r in rows]
@@ -230,20 +243,29 @@ def advanced_search(
         put_conn(conn)
 
 
-
-
-
 @router.get("/stats", response_model=NewsStats)
 def get_news_statistics(
     categoria: Optional[str] = Query(None, description="Filtrar por categoría"),
     fuente: Optional[str] = Query(None, description="Filtrar por fuente"),
     anio: Optional[int] = Query(None, description="Filtrar por año"),
     fecha_desde: Optional[str] = Query(None, description="Fecha desde (YYYY-MM-DD)"),
-    fecha_hasta: Optional[str] = Query(None, description="Fecha hasta (YYYY-MM-DD)")
+    fecha_hasta: Optional[str] = Query(None, description="Fecha hasta (YYYY-MM-DD)"),
+    current_user: Optional[dict] = Depends(require_role(["admin", "user", "moderator"], optional=True))
 ):
-    """Obtiene estadísticas detalladas de las noticias"""
+    """
+    Obtiene estadísticas detalladas de las noticias.
+    Requiere autenticación (disponible para todos los usuarios con cuenta).
+    """
+    # Verificar que el usuario esté autenticado
+    if not current_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Se requiere autenticación para acceder a las estadísticas. Por favor, inicia sesión."
+        )
     conn = get_conn()
     try:
+        cur = conn.cursor()
+        
         # Construir filtros básicos
         where_conditions = []
         params = []
@@ -270,69 +292,59 @@ def get_news_statistics(
     finally:
         put_conn(conn)
 
+
 def get_news_stats(conn, where_sql: str, params: List[Any]) -> NewsStats:
     """Función auxiliar para obtener estadísticas"""
     cur = conn.cursor()
-
-    unified_query = """
-        (SELECT id, titulo, fecha, hora, anio, mes, dia, dia_semana, resumen, contenido, categoria, autor, keywords, url, dominio, fecha_extraccion, imagen_principal, cantidad_imagenes, tiene_imagenes, fuente, longitud_titulo, longitud_resumen, tipo_contenido, created_at FROM noticias_limpia)
-        UNION ALL
-        (SELECT id, titulo, fecha, CAST(fecha AS time) as hora, EXTRACT(YEAR FROM fecha) as anio, EXTRACT(MONTH FROM fecha) as mes, EXTRACT(DAY FROM fecha) as dia, TRIM(TO_CHAR(fecha, 'Day')) as dia_semana, resumen, NULL as contenido, categoria, NULL as autor, NULL as keywords, url, SUBSTRING(url from 'https?://([^/]+)') as dominio, created_at as fecha_extraccion, imagen as imagen_principal, CASE WHEN imagen IS NOT NULL THEN 1 ELSE 0 END as cantidad_imagenes, (imagen IS NOT NULL) as tiene_imagenes, fuente, LENGTH(titulo) as longitud_titulo, LENGTH(resumen) as longitud_resumen, 'social' as tipo_contenido, created_at FROM social_news)
-    """
     
     # Total de noticias
-    cur.execute(f"SELECT COUNT(*) FROM ({unified_query}) AS unified_news {where_sql}", params)
+    cur.execute(f"SELECT COUNT(*) FROM noticias_limpia {where_sql}", params)
     total_noticias = cur.fetchone()[0]
     
     # Por fuente
     cur.execute(f"""
         SELECT fuente, COUNT(*) 
-        FROM ({unified_query}) AS unified_news {where_sql}
+        FROM noticias_limpia {where_sql}
         GROUP BY fuente 
         ORDER BY COUNT(*) DESC
     """, params)
     noticias_por_fuente = dict(cur.fetchall())
     
     # Por categoría
-    # La cláusula WHERE debe inyectarse correctamente
-    where_for_category = where_sql.replace("WHERE", "AND") if where_sql else ""
     cur.execute(f"""
         SELECT categoria, COUNT(*) 
-        FROM ({unified_query}) AS unified_news
-        WHERE categoria IS NOT NULL AND categoria != '' {where_for_category}
+        FROM noticias_limpia {where_sql}
+        WHERE categoria IS NOT NULL AND categoria != ''
         GROUP BY categoria 
         ORDER BY COUNT(*) DESC
     """, params)
     noticias_por_categoria = dict(cur.fetchall())
     
     # Por mes
-    where_for_month = where_sql.replace("WHERE", "AND") if where_sql else ""
     cur.execute(f"""
         SELECT mes, COUNT(*) 
-        FROM ({unified_query}) AS unified_news
-        WHERE mes IS NOT NULL {where_for_month}
+        FROM noticias_limpia {where_sql}
+        WHERE mes IS NOT NULL
         GROUP BY mes 
         ORDER BY mes
     """, params)
     noticias_por_mes = {str(int(mes)): count for mes, count in cur.fetchall()}
     
     # Por día de la semana
-    where_for_day = where_sql.replace("WHERE", "AND") if where_sql else ""
     cur.execute(f"""
         SELECT dia_semana, COUNT(*) 
-        FROM ({unified_query}) AS unified_news
-        WHERE dia_semana IS NOT NULL {where_for_day}
+        FROM noticias_limpia {where_sql}
+        WHERE dia_semana IS NOT NULL
         GROUP BY dia_semana 
         ORDER BY COUNT(*) DESC
     """, params)
     noticias_por_dia_semana = dict(cur.fetchall())
     
     # Por tipo de contenido
-    where_for_type = where_sql.replace("WHERE", "AND") if where_sql else ""
     cur.execute(f"""
         SELECT tipo_contenido, COUNT(*) 
-        FROM ({unified_query}) AS unified_news
-        WHERE tipo_contenido IS NOT NULL {where_for_type}
+        FROM noticias_limpia {where_sql}
+        WHERE tipo_contenido IS NOT NULL
         GROUP BY tipo_contenido 
         ORDER BY COUNT(*) DESC
     """, params)
@@ -343,36 +355,33 @@ def get_news_stats(conn, where_sql: str, params: List[Any]) -> NewsStats:
         SELECT 
             SUM(CASE WHEN tiene_imagenes = true THEN 1 ELSE 0 END) as con_imagenes,
             SUM(CASE WHEN tiene_imagenes = false THEN 1 ELSE 0 END) as sin_imagenes
-        FROM ({unified_query}) AS unified_news {where_sql}
+        FROM noticias_limpia {where_sql}
     """, params)
     con_imagenes, sin_imagenes = cur.fetchone()
     
     # Promedios
-    where_for_avg = where_sql.replace("WHERE", "AND") if where_sql else ""
     cur.execute(f"""
         SELECT 
             AVG(longitud_titulo) as avg_titulo,
             AVG(longitud_resumen) as avg_resumen
-        FROM ({unified_query}) AS unified_news
-        WHERE longitud_titulo IS NOT NULL AND longitud_resumen IS NOT NULL {where_for_avg}
+        FROM noticias_limpia {where_sql}
+        WHERE longitud_titulo IS NOT NULL AND longitud_resumen IS NOT NULL
     """, params)
     avg_titulo, avg_resumen = cur.fetchone()
     
     # Dominios únicos
-    where_for_domain = where_sql.replace("WHERE", "AND") if where_sql else ""
     cur.execute(f"""
         SELECT COUNT(DISTINCT dominio) 
-        FROM ({unified_query}) AS unified_news
-        WHERE dominio IS NOT NULL {where_for_domain}
+        FROM noticias_limpia {where_sql}
+        WHERE dominio IS NOT NULL
     """, params)
     dominios_unicos = cur.fetchone()[0]
     
     # Rango de fechas
-    where_for_date = where_sql.replace("WHERE", "AND") if where_sql else ""
     cur.execute(f"""
         SELECT MIN(fecha), MAX(fecha) 
-        FROM ({unified_query}) AS unified_news
-        WHERE fecha IS NOT NULL {where_for_date}
+        FROM noticias_limpia {where_sql}
+        WHERE fecha IS NOT NULL
     """, params)
     fecha_min, fecha_max = cur.fetchone()
     
@@ -401,33 +410,27 @@ def get_news_metrics():
     conn = get_conn()
     try:
         cur = conn.cursor()
-
-        unified_query = """
-            (SELECT id, titulo, fecha, hora, anio, mes, dia, dia_semana, resumen, contenido, categoria, autor, keywords, url, dominio, fecha_extraccion, imagen_principal, cantidad_imagenes, tiene_imagenes, fuente, longitud_titulo, longitud_resumen, tipo_contenido, created_at FROM noticias_limpia)
-            UNION ALL
-            (SELECT id, titulo, fecha, CAST(fecha AS time) as hora, EXTRACT(YEAR FROM fecha) as anio, EXTRACT(MONTH FROM fecha) as mes, EXTRACT(DAY FROM fecha) as dia, TRIM(TO_CHAR(fecha, 'Day')) as dia_semana, resumen, NULL as contenido, categoria, NULL as autor, NULL as keywords, url, SUBSTRING(url from 'https?://([^/]+)') as dominio, created_at as fecha_extraccion, imagen as imagen_principal, CASE WHEN imagen IS NOT NULL THEN 1 ELSE 0 END as cantidad_imagenes, (imagen IS NOT NULL) as tiene_imagenes, fuente, LENGTH(titulo) as longitud_titulo, LENGTH(resumen) as longitud_resumen, 'social' as tipo_contenido, created_at FROM social_news)
-        """
         
         # Métricas básicas
-        cur.execute(f"SELECT COUNT(*) FROM ({unified_query}) AS unified_news")
+        cur.execute("SELECT COUNT(*) FROM noticias_limpia")
         total = cur.fetchone()[0]
         
-        cur.execute(f"SELECT COUNT(*) FROM ({unified_query}) AS unified_news WHERE tiene_imagenes = true")
+        cur.execute("SELECT COUNT(*) FROM noticias_limpia WHERE tiene_imagenes = true")
         con_imagenes = cur.fetchone()[0]
         
-        cur.execute(f"SELECT COUNT(*) FROM ({unified_query}) AS unified_news WHERE tiene_imagenes = false")
+        cur.execute("SELECT COUNT(*) FROM noticias_limpia WHERE tiene_imagenes = false")
         sin_imagenes = cur.fetchone()[0]
         
-        cur.execute(f"SELECT AVG(longitud_titulo), AVG(longitud_resumen) FROM ({unified_query}) AS unified_news")
+        cur.execute("SELECT AVG(longitud_titulo), AVG(longitud_resumen) FROM noticias_limpia")
         avg_titulo, avg_resumen = cur.fetchone()
         
-        cur.execute(f"SELECT COUNT(DISTINCT fuente) FROM ({unified_query}) AS unified_news")
+        cur.execute("SELECT COUNT(DISTINCT fuente) FROM noticias_limpia")
         fuentes_activas = cur.fetchone()[0]
         
-        cur.execute(f"SELECT COUNT(DISTINCT categoria) FROM ({unified_query}) AS unified_news WHERE categoria IS NOT NULL AND categoria != ''")
+        cur.execute("SELECT COUNT(DISTINCT categoria) FROM noticias_limpia WHERE categoria IS NOT NULL AND categoria != ''")
         categorias_activas = cur.fetchone()[0]
         
-        cur.execute(f"SELECT COUNT(DISTINCT dominio) FROM ({unified_query}) AS unified_news WHERE dominio IS NOT NULL")
+        cur.execute("SELECT COUNT(DISTINCT dominio) FROM noticias_limpia WHERE dominio IS NOT NULL")
         dominios_unicos = cur.fetchone()[0]
         
         return NewsMetrics(

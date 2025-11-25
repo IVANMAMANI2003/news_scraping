@@ -164,6 +164,9 @@
         const container = document.getElementById('categories-container');
         if (!container) return;
 
+        // Agregar clase row para el sistema de grid de Bootstrap
+        container.className = 'row';
+
         const cards = await Promise.all(categorias.map(async (categoria) => {
             const categoriaName = categoria.nombre || categoria;
             const news = newsByCategoria[categoriaName] || [];
@@ -182,23 +185,29 @@
             const date = latestNews ? formatDate(latestNews.fecha || latestNews.created_at) : '';
 
             return `
-                <div class="col-lg-3 col-md-6 mb-4">
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
                     <div class="card h-100 shadow-sm">
                         <div class="position-relative">
-                            <img class="card-img-top" src="${img}" alt="${categoriaName}" style="height: 200px; object-fit: cover;">
+                            <img class="card-img-top" src="${img}" alt="${categoriaName}" style="height: 220px; object-fit: cover;">
                             <div class="position-absolute top-0 right-0 m-2">
-                                <span class="badge badge-primary">${realCount} noticias</span>
+                                <span class="badge bg-primary fs-6 px-3 py-2">${realCount} noticias</span>
                             </div>
                         </div>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title text-uppercase font-weight-bold">${categoriaName}</h5>
+                        <div class="card-body d-flex flex-column p-4">
+                            <h5 class="card-title text-uppercase fw-bold mb-3" style="font-size: 1.1rem; min-height: 2.5rem;">${categoriaName}</h5>
                             ${latestNews ? `
-                                <p class="card-text text-muted small">Última noticia: ${date}</p>
-                                <p class="card-text">${(latestNews.titulo || '').substring(0, 100)}${(latestNews.titulo || '').length > 100 ? '...' : ''}</p>
-                            ` : '<p class="card-text text-muted">No hay noticias disponibles</p>'}
+                                <p class="card-text text-muted mb-2" style="font-size: 0.85rem;">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    Última: ${date}
+                                </p>
+                                <p class="card-text mb-3" style="font-size: 0.9rem; line-height: 1.5; min-height: 3rem;">
+                                    ${(latestNews.titulo || '').substring(0, 120)}${(latestNews.titulo || '').length > 120 ? '...' : ''}
+                                </p>
+                            ` : '<p class="card-text text-muted mb-3">No hay noticias disponibles</p>'}
                             <div class="mt-auto">
-                                <a href="category.html?categoria=${encodeURIComponent(categoriaName)}" class="btn btn-primary btn-block">
-                                    Ver Noticias de ${categoriaName}
+                                <a href="category.html?categoria=${encodeURIComponent(categoriaName)}" class="btn btn-primary w-100 py-2" style="font-size: 0.9rem; font-weight: 600;">
+                                    <i class="fas fa-eye me-2"></i>
+                                    Ver Noticias
                                 </a>
                             </div>
                         </div>
@@ -208,6 +217,18 @@
         }));
 
         container.innerHTML = cards.join('');
+        
+        // Agregar animación de entrada
+        const allCards = container.querySelectorAll('.col-xl-3, .col-lg-4, .col-md-6, .col-sm-6');
+        allCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 50);
+        });
     }
 
     function renderBreakingNews(news) {
@@ -273,6 +294,7 @@
             console.error('Error initializing categorias page:', err);
             const container = document.getElementById('categories-container');
             if (container) {
+                container.className = 'row';
                 container.innerHTML = `
                     <div class="col-12">
                         <div class="alert alert-danger">

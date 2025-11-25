@@ -191,13 +191,13 @@ class SinFronterasLocalScraper:
             soup = BeautifulSoup(response.content, 'html.parser')
             
             # Extraer título
-            title_selectors = [
-                'h1.entry-title',
-                'h1.post-title', 
-                'h1.article-title',
+        title_selectors = [
+            'h1.entry-title',
+            'h1.post-title',
+            'h1.article-title',
                 '.single-title h1',
-                'article h1',
-                'h1',
+            'article h1',
+            'h1',
                 '.title h1',
                 '.entry-header h1'
             ]
@@ -226,21 +226,21 @@ class SinFronterasLocalScraper:
                     summary_elem = soup.select_one(selector)
                     if summary_elem:
                         resumen = self.clean_text(summary_elem.get('content', ''))
-                        break
-                else:
+                break
+        else:
                     summary_elem = soup.select_one(selector)
                     if summary_elem:
                         resumen = self.clean_text(summary_elem.get_text())
                         break
             
             # Extraer contenido principal
-            content_selectors = [
-                '.entry-content',
-                '.post-content',
-                '.article-content',
-                '.content',
-                'article .text',
-                '.single-content',
+        content_selectors = [
+            '.entry-content',
+            '.post-content',
+            '.article-content',
+            '.content',
+            'article .text',
+            '.single-content',
                 '.post-body'
             ]
             contenido = ""
@@ -301,7 +301,7 @@ class SinFronterasLocalScraper:
                 if tag_elems:
                     tags = [self.clean_text(tag.get_text()) for tag in tag_elems]
                     break
-            
+        
             # Extraer imágenes
             images = self.extract_images(soup)
             
@@ -394,7 +394,7 @@ class SinFronterasLocalScraper:
         
         for pattern in exclude_patterns:
             if pattern in url.lower():
-                return False
+            return False
         
         return True
     

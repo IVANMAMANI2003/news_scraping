@@ -1,0 +1,53 @@
+[
+  {
+    "id": 9898,
+    "titulo": "PUNO: Diario Los Andes 12/11/2025",
+    "fecha": "2025-11-12T00:00:00",
+    "resumen": "Guarda mi nombre, correo electrónico y sitio web en este navegador para la próxima vez que comente",
+    "contenido": "Guarda mi nombre, correo electrónico y sitio web en este navegador para la próxima vez que comente. Diario referente del sur del Perú, espacio de reflexión sobre el desarrollo humano y su relación con el medio ambiente, la sociedad y la economía © 2024 Diario los Andes. Todos los derechos reservados.",
+    "categoria": "General",
+    "autor": "Diario los Andes",
+    "tags": null,
+    "url": "https://losandes.com.pe/puno-diario-los-andes-12-11-2025/?signup",
+    "fecha_extraccion": "2025-11-14T17:31:02.335213",
+    "caracteres_contenido": 301,
+    "palabras_contenido": 51,
+    "imagenes": null,
+    "fuente": "Los Andes",
+    "created_at": "2025-11-14T17:31:01.874493"
+  },
+  {
+    "id": 9897,
+    "titulo": "AREQUIPA: Diario Los Andes 26/08/2024",
+    "fecha": "2024-08-26T00:00:00",
+    "resumen": "Diario referente del sur del Perú, espacio de reflexión sobre el desarrollo humano y su relación con el medio ambiente, la sociedad y la economía © 2024 Diario los Andes",
+    "contenido": "Diario referente del sur del Perú, espacio de reflexión sobre el desarrollo humano y su relación con el medio ambiente, la sociedad y la economía © 2024 Diario los Andes. Todos los derechos reservados.",
+    "categoria": "General",
+    "autor": "Diario los Andes",
+    "tags": null,
+    "url": "https://losandes.com.pe/arequipa-diario-los-andes-26-08-2024/?signup",
+    "fecha_extraccion": "2025-11-14T17:31:02.309007",
+    "caracteres_contenido": 201,
+    "palabras_contenido": 34,
+    "imagenes": null,
+    "fuente": "Los Andes",
+    "created_at": "2025-11-14T17:31:01.874493"
+  },
+  {
+    "id": 9896,
+    "titulo": "Diario Los Andes 20/08/2024",
+    "fecha": "2024-08-20T00:00:00",
+    "resumen": "Diario referente del sur del Perú, espacio de reflexión sobre el desarrollo humano y su relación con el medio ambiente, la sociedad y la economía © 2024 Diario los Andes",
+    "contenido": "Diario referente del sur del Perú, espacio de reflexión sobre el desarrollo humano y su relación con el medio ambiente, la sociedad y la economía © 2024 Diario los Andes. Todos los derechos reservados.",
+    "categoria": "General",
+    "autor": "Diario los Andes",
+    "tags": null,
+    "url": "https://losandes.com.pe/diario-los-andes-20-08-2024/?signup",
+    "fecha_extraccion": "2025-11-14T17:31:02.294401",
+    "caracteres_contenido": 201,
+    "palabras_contenido": 34,
+    "imagenes": null,
+    "fuente": "Los Andes",
+    "created_at": "2025-11-14T17:31:01.874493"
+  }
+]

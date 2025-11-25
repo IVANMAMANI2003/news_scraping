@@ -12,6 +12,24 @@
 
     console.log('🚀 Iniciando BizNews JavaScript...');
 
+    // Helper function to get correct path for public pages
+    function getPagePath(filename) {
+        const path = window.location.pathname;
+        const isInPageFolder = path.includes('/page/');
+        const isRoot = path === '/' || path === '' || path === '/index.html' || 
+                      (!path.includes('/page/') && !path.includes('/admin/'));
+        
+        // If we're in root or index.html, use page/ prefix
+        if (isRoot && !isInPageFolder) {
+            return `page/${filename}`;
+        }
+        // If we're already in page/, use relative path
+        return filename;
+    }
+
+    // Make it globally available
+    window.getPagePath = getPagePath;
+
     function cleanContent(content) {
         if (!content) return '';
         return content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
@@ -59,7 +77,8 @@
     async function fetchNews() {
         try {
             console.log('📡 Obteniendo noticias de la API...');
-            const response = await fetch(NEWS_ENDPOINT);
+            // Solicitar noticias ordenadas por fecha descendente (más recientes primero)
+            const response = await fetch(`${NEWS_ENDPOINT}?order=desc&limit=100`);
             
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
@@ -68,15 +87,49 @@
             const data = await response.json();
             console.log('✅ Noticias obtenidas:', data.total);
             
-            // Filtrar noticias problemáticas
-            const filteredNews = (data.items || []).filter(news => {
+            // Filtrar noticias problemáticas y excluir noticias de Reddit
+            const allNews = data.items || [];
+            console.log('📊 Total noticias recibidas:', allNews.length);
+            
+            // Debug: Mostrar todas las fuentes únicas
+            const uniqueSources = [...new Set(allNews.map(n => n.fuente).filter(Boolean))];
+            console.log('📋 Fuentes encontradas:', uniqueSources);
+            
+            // Contar noticias de Reddit antes de filtrar (múltiples variantes)
+            const redditVariants = ['reddit', 'Reddit', 'REDDIT'];
+            const redditNews = allNews.filter(n => {
+                if (!n.fuente) return false;
+                const fuenteLower = n.fuente.toLowerCase();
+                return redditVariants.some(variant => fuenteLower.includes(variant.toLowerCase()));
+            });
+            console.log('📱 Noticias de Reddit detectadas:', redditNews.length);
+            if (redditNews.length > 0) {
+                console.log('📱 Ejemplos de fuentes Reddit:', redditNews.slice(0, 3).map(n => ({id: n.id, fuente: n.fuente, titulo: n.titulo?.substring(0, 40)})));
+            }
+            
+            const filteredNews = allNews.filter(news => {
                 if (!news.titulo || news.titulo.trim() === '') return false;
                 if (news.titulo.toLowerCase().includes('login/register')) return false;
                 if (news.resumen && news.resumen.includes('[tdc_zone')) return false;
+                
+                // Excluir noticias de Reddit (múltiples variantes)
+                if (news.fuente) {
+                    const fuenteLower = news.fuente.toLowerCase();
+                    if (fuenteLower.includes('reddit')) {
+                        console.log('🚫 Excluyendo noticia de Reddit:', {
+                            id: news.id,
+                            fuente: news.fuente,
+                            titulo: news.titulo?.substring(0, 50)
+                        });
+                        return false;
+                    }
+                }
+                
                 return true;
             });
             
-            console.log('📰 Noticias válidas:', filteredNews.length);
+            console.log('📰 Noticias válidas (excluyendo Reddit):', filteredNews.length);
+            console.log('📰 Noticias filtradas:', allNews.length - filteredNews.length);
             return filteredNews;
         } catch (error) {
             console.error('❌ Error obteniendo noticias:', error);
@@ -96,7 +149,7 @@
                     <div class="news-content">
                         <div class="news-category">${news.categoria || 'General'}</div>
                         <h3 class="news-title">
-                            <a href="detalle_noticias.html?id=${news.id}">${cleanContent(news.titulo)}</a>
+                            <a href="${getPagePath('detalle_noticias.html')}?id=${news.id}">${cleanContent(news.titulo)}</a>
                         </h3>
                         <p class="news-summary">${cleanContent(news.resumen || news.contenido || '').substring(0, 150)}...</p>
                         <div class="news-meta">
@@ -125,7 +178,7 @@
                      onerror="this.src='img/news-700x435-1.jpg'">
                 <div class="small-news-content">
                     <h4 class="small-news-title">
-                        <a href="detalle_noticias.html?id=${news.id}">${cleanContent(news.titulo)}</a>
+                        <a href="${getPagePath('detalle_noticias.html')}?id=${news.id}">${cleanContent(news.titulo)}</a>
                     </h4>
                     <div class="small-news-meta">
                         <i class="fas fa-calendar"></i>
@@ -194,10 +247,28 @@
         // Limpiar contenido de carga
         container.innerHTML = '';
         
-        const featured = news[0];
+        // Filtrar noticias de Reddit
+        const filteredNews = news.filter(n => {
+            if (!n.fuente) return true;
+            const fuenteLower = n.fuente.toLowerCase();
+            const isReddit = fuenteLower.includes('reddit');
+            if (isReddit) {
+                console.log('🚫 Excluyendo Reddit de destacada:', n.id, n.fuente, n.titulo?.substring(0, 40));
+            }
+            return !isReddit;
+        });
+        
+        console.log('📊 Noticias para destacada - Total:', news.length, 'Filtradas:', filteredNews.length);
+        
+        const featured = filteredNews[0];
         if (!featured) {
             container.innerHTML = '<p class="text-center text-muted">No hay noticias disponibles</p>';
             return;
+        }
+        
+        // Verificar que la noticia destacada no sea de Reddit
+        if (featured.fuente && featured.fuente.toLowerCase().includes('reddit')) {
+            console.error('❌ ERROR: Noticia destacada es de Reddit!', featured);
         }
         
         const img = getImageUrl(featured.imagenes);
@@ -240,7 +311,26 @@
         // Limpiar contenido de carga
         container.innerHTML = '';
         
-        const latestNews = news.slice(0, 6);
+        // Filtrar noticias de Reddit
+        const filteredNews = news.filter(n => {
+            if (!n.fuente) return true;
+            const fuenteLower = n.fuente.toLowerCase();
+            const isReddit = fuenteLower.includes('reddit');
+            if (isReddit) {
+                console.log('🚫 Excluyendo Reddit de últimas:', n.id, n.fuente, n.titulo?.substring(0, 40));
+            }
+            return !isReddit;
+        });
+        const latestNews = filteredNews.slice(0, 6);
+        
+        // Verificar que no haya Reddit en últimas noticias
+        const redditInLatest = latestNews.filter(n => 
+            n.fuente && n.fuente.toLowerCase().includes('reddit')
+        );
+        if (redditInLatest.length > 0) {
+            console.error('❌ ERROR: Hay Reddit en últimas noticias!', redditInLatest);
+        }
+        
         const cards = latestNews.map(buildNewsCard).join('');
         
         container.innerHTML = `
@@ -248,7 +338,7 @@
                 ${cards}
 			</div>
 		`;
-        console.log('✅ Últimas noticias renderizadas:', latestNews.length);
+        console.log('✅ Últimas noticias renderizadas:', latestNews.length, '(Total filtradas:', filteredNews.length, ')');
     }
 
     function renderSmallNewsCards(news) {
@@ -262,13 +352,18 @@
         // Limpiar contenido de carga
         container.innerHTML = '';
         
-        const punoNews = news.filter(n => 
+        // Filtrar noticias de Reddit
+        const filteredNews = news.filter(n => {
+            return !n.fuente || !n.fuente.toLowerCase().includes('reddit');
+        });
+        
+        const punoNews = filteredNews.filter(n => 
             n.categoria === 'Puno' || 
             (n.titulo && n.titulo.toLowerCase().includes('puno')) ||
             (n.resumen && n.resumen.toLowerCase().includes('puno'))
         );
         
-        const selectedNews = punoNews.length > 0 ? punoNews.slice(0, 4) : news.slice(0, 4);
+        const selectedNews = punoNews.length > 0 ? punoNews.slice(0, 4) : filteredNews.slice(0, 4);
         const cards = selectedNews.map(buildSmallCard).join('');
         
         container.innerHTML = cards;
@@ -286,7 +381,11 @@
         // Limpiar contenido de carga
         container.innerHTML = '';
         
-        const trendingNews = news.slice(0, 5);
+        // Filtrar noticias de Reddit
+        const filteredNews = news.filter(n => {
+            return !n.fuente || !n.fuente.toLowerCase().includes('reddit');
+        });
+        const trendingNews = filteredNews.slice(0, 5);
         const cards = trendingNews.map(buildSmallCard).join('');
         
         container.innerHTML = cards;
@@ -304,8 +403,13 @@
         // Limpiar contenido de carga
         container.innerHTML = '';
         
+        // Filtrar noticias de Reddit
+        const filteredNews = news.filter(n => {
+            return !n.fuente || !n.fuente.toLowerCase().includes('reddit');
+        });
+        
         const categories = {};
-        news.forEach(n => {
+        filteredNews.forEach(n => {
             const cat = n.categoria || 'General';
             categories[cat] = (categories[cat] || 0) + 1;
         });
@@ -331,17 +435,22 @@
         const totalSources = document.getElementById('total-sources');
         const totalCategories = document.getElementById('total-categories');
         
+        // Filtrar noticias de Reddit
+        const filteredNews = news.filter(n => {
+            return !n.fuente || !n.fuente.toLowerCase().includes('reddit');
+        });
+        
         if (totalNews) {
-            totalNews.textContent = news.length.toLocaleString();
+            totalNews.textContent = filteredNews.length.toLocaleString();
         }
         
         if (totalSources) {
-            const sources = new Set(news.map(n => n.fuente)).size;
+            const sources = new Set(filteredNews.map(n => n.fuente)).size;
             totalSources.textContent = sources;
         }
         
         if (totalCategories) {
-            const categories = new Set(news.map(n => n.categoria)).size;
+            const categories = new Set(filteredNews.map(n => n.categoria)).size;
             totalCategories.textContent = categories;
         }
         
@@ -360,6 +469,20 @@
                 console.log('⚠️ No hay noticias disponibles');
             } else {
                 console.log('🎯 Procesando noticias para página principal...');
+                
+                // Verificar que no haya noticias de Reddit después del filtro
+                const redditInFiltered = news.filter(n => 
+                    n.fuente && n.fuente.toLowerCase().includes('reddit')
+                );
+                if (redditInFiltered.length > 0) {
+                    console.warn('⚠️ ADVERTENCIA: Hay noticias de Reddit después del filtro:', redditInFiltered.length);
+                    console.warn('⚠️ Ejemplos:', redditInFiltered.slice(0, 3).map(n => ({
+                        id: n.id,
+                        fuente: n.fuente,
+                        titulo: n.titulo?.substring(0, 40)
+                    })));
+                }
+                
                 // Renderizar secciones principales
                 renderFeaturedNews(news);
                 renderLatestNews(news);

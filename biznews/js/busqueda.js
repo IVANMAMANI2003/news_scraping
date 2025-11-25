@@ -11,30 +11,125 @@
     let isLoading = false;
 
     // Elementos del DOM
-    const searchForm = document.getElementById('searchForm');
-    const searchResults = document.getElementById('searchResults');
-    const searchStats = document.getElementById('searchStats');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const noResults = document.getElementById('noResults');
-    const clearFiltersBtn = document.getElementById('clearFilters');
+    let searchForm = document.getElementById('search-form');
+    let searchResults = document.getElementById('search-results');
+    let resultsCount = document.getElementById('results-count');
+    let totalResultsEl = document.getElementById('total-results');
+    let activeFiltersEl = document.getElementById('active-filters');
+    let filterTagsEl = document.getElementById('filter-tags');
+    let clearFiltersBtn = document.getElementById('clear-filters');
+
+    // Obtener token de autenticación
+    function getAuthToken() {
+        // Intentar obtener token de publicAuthManager
+        if (window.publicAuthManager) {
+            const token = window.publicAuthManager.getAccessToken();
+            if (token) return token;
+        }
+        
+        // Intentar obtener token de authManager (admin)
+        if (window.authManager) {
+            const token = window.authManager.getAccessToken();
+            if (token) return token;
+        }
+        
+        // Intentar obtener directamente de localStorage
+        try {
+            const publicSession = localStorage.getItem('biznews_session');
+            if (publicSession) {
+                const session = JSON.parse(publicSession);
+                if (session.access_token) return session.access_token;
+            }
+            
+            const adminSession = localStorage.getItem('biznews_admin_session');
+            if (adminSession) {
+                const session = JSON.parse(adminSession);
+                if (session.access_token) return session.access_token;
+            }
+        } catch (e) {
+            // Ignorar errores
+        }
+        
+        return null;
+    }
+
+    // Verificar autenticación
+    async function checkAuthentication() {
+        const token = getAuthToken();
+        if (!token) {
+            const container = document.querySelector('.main-content');
+            if (container) {
+                container.innerHTML = `
+                    <div class="content-card">
+                        <div class="alert alert-warning text-center" style="max-width: 600px; margin: 4rem auto; padding: 3rem;">
+                            <i class="fas fa-lock fa-3x mb-3 text-warning"></i>
+                            <h4>Acceso Restringido</h4>
+                            <p>La búsqueda avanzada está disponible solo para usuarios autenticados.</p>
+                            <p class="mb-3">Por favor, <a href="../page/login.html">inicia sesión</a> para acceder a esta funcionalidad.</p>
+                            <a href="../page/login.html" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+            return false;
+        }
+        
+        // Verificar que el token sea válido
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                const container = document.querySelector('.main-content');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="content-card">
+                            <div class="alert alert-warning text-center" style="max-width: 600px; margin: 4rem auto; padding: 3rem;">
+                                <i class="fas fa-lock fa-3x mb-3 text-warning"></i>
+                                <h4>Acceso Restringido</h4>
+                                <p>Tu sesión ha expirado. Por favor, <a href="../page/login.html">inicia sesión</a> nuevamente.</p>
+                                <a href="../page/login.html" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error verificando autenticación:', error);
+            return false;
+        }
+    }
 
     // Inicialización
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Verificar autenticación primero
+        const isAuthenticated = await checkAuthentication();
+        if (!isAuthenticated) {
+            return; // No continuar si no está autenticado
+        }
+        
         initializeForm();
         loadMetadata();
         setupEventListeners();
     });
 
     function initializeForm() {
-        // Configurar valores por defecto
-        const today = new Date();
-        const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-        
-        document.getElementById('fechaDesde').value = lastMonth.toISOString().split('T')[0];
-        document.getElementById('fechaHasta').value = today.toISOString().split('T')[0];
+        // No establecer valores por defecto, dejar que el usuario elija
     }
 
     function setupEventListeners() {
+        if (!searchForm) return;
+        
         // Formulario de búsqueda
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -42,26 +137,11 @@
         });
 
         // Botón limpiar filtros
-        clearFiltersBtn.addEventListener('click', function() {
-            clearAllFilters();
-        });
-
-        // Búsqueda en tiempo real (opcional)
-        const searchInputs = ['searchText', 'searchKeywords'];
-        searchInputs.forEach(id => {
-            const input = document.getElementById(id);
-            if (input) {
-                let timeout;
-                input.addEventListener('input', function() {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => {
-                        if (this.value.length >= 3 || this.value.length === 0) {
-                            performSearch();
-                        }
-                    }, 500);
-                });
-            }
-        });
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', function() {
+                clearAllFilters();
+            });
+        }
     }
 
     async function loadMetadata() {
@@ -74,17 +154,17 @@
             const categorias = await fetchMetadata('categorias');
             populateSelect('categoria', categorias);
 
-            // Cargar dominios
-            const dominios = await fetchMetadata('dominios');
-            populateSelect('dominio', dominios);
-
             // Cargar años
             const anos = await fetchMetadata('anos');
             populateSelect('anio', anos, true);
-
-            // Cargar tipos de contenido
-            const tipos = await fetchMetadata('tipos-contenido');
-            populateSelect('tipoContenido', tipos);
+            
+            // Cargar meses
+            const meses = await fetchMetadata('meses');
+            populateSelect('mes', meses, true);
+            
+            // Cargar días de la semana
+            const diasSemana = await fetchMetadata('dias-semana');
+            populateSelect('dia_semana', diasSemana);
 
         } catch (error) {
             console.error('Error cargando metadatos:', error);
@@ -111,7 +191,14 @@
 
     async function fetchMetadata(type) {
         try {
-            const response = await fetch(`${METADATA_ENDPOINT}/${type}/listar`);
+            // Incluir token de autenticación si está disponible
+            const token = getAuthToken();
+            const headers = {};
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+            
+            const response = await fetch(`${METADATA_ENDPOINT}/${type}/listar`, { headers });
             if (!response.ok) {
                 throw new Error(`Error fetching ${type}: ${response.status}`);
             }
@@ -150,46 +237,30 @@
     function collectFilters() {
         const filters = {};
         
-        // Texto de búsqueda
-        const searchText = document.getElementById('searchText').value.trim();
-        if (searchText) filters.q = searchText;
-
-        // Keywords
-        const keywords = document.getElementById('searchKeywords').value.trim();
-        if (keywords) filters.keywords = keywords;
+        // Texto de búsqueda (query)
+        const query = document.getElementById('query')?.value.trim();
+        if (query) filters.q = query;
 
         // Filtros de selección
-        const selectFilters = ['fuente', 'categoria', 'dominio', 'anio', 'mes', 'diaSemana', 'tipoContenido', 'tieneImagenes'];
+        const selectFilters = ['fuente', 'categoria', 'anio', 'mes', 'dia_semana'];
         selectFilters.forEach(id => {
-            const value = document.getElementById(id).value;
-            if (value) {
-                const filterKey = id === 'diaSemana' ? 'dia_semana' : 
-                                 id === 'tipoContenido' ? 'tipo_contenido' : 
-                                 id === 'tieneImagenes' ? 'tiene_imagenes' : id;
-                filters[filterKey] = value;
-            }
-        });
-
-        // Filtros numéricos
-        const numericFilters = ['longitudTituloMin', 'longitudTituloMax'];
-        numericFilters.forEach(id => {
-            const value = document.getElementById(id).value;
-            if (value) {
-                const filterKey = id === 'longitudTituloMin' ? 'longitud_titulo_min' : 'longitud_titulo_max';
-                filters[filterKey] = parseInt(value);
+            const element = document.getElementById(id);
+            if (element && element.value) {
+                const filterKey = id === 'dia_semana' ? 'dia_semana' : id;
+                filters[filterKey] = element.value;
             }
         });
 
         // Filtros de fecha
-        const fechaDesde = document.getElementById('fechaDesde').value;
+        const fechaDesde = document.getElementById('fecha_desde')?.value;
         if (fechaDesde) filters.fecha_desde = fechaDesde;
 
-        const fechaHasta = document.getElementById('fechaHasta').value;
+        const fechaHasta = document.getElementById('fecha_hasta')?.value;
         if (fechaHasta) filters.fecha_hasta = fechaHasta;
 
-        // Límite de resultados
-        const limit = document.getElementById('limit').value;
-        if (limit) filters.limit = parseInt(limit);
+        // Límite de resultados (por defecto 50)
+        filters.limit = 50;
+        filters.order = 'desc'; // Más recientes primero
 
         return filters;
     }
@@ -206,14 +277,25 @@
             const url = `${ADVANCED_ENDPOINT}/search?${params.toString()}`;
             console.log('Buscando en:', url);
 
-            const response = await fetch(url, {
-                headers: {
-                    "Accept": "application/json",
-                    "Content-Type": "application/json"
-                }
-            });
+            // Incluir token de autenticación
+            const token = getAuthToken();
+            const headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            };
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(url, { headers });
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Se requiere autenticación para acceder a la búsqueda avanzada. Por favor, inicia sesión.');
+                } else if (response.status === 403) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || 'No tienes permisos para acceder a esta funcionalidad');
+                }
                 throw new Error(`Error en la búsqueda: ${response.status}`);
             }
 
@@ -226,25 +308,39 @@
     }
 
     function displayResults(data) {
+        if (!searchResults) return;
+        
         const { total, items } = data;
-        totalResults = total;
+        totalResults = total || 0;
 
-        // Actualizar estadísticas
-        updateStats(total, items.length);
+        // Actualizar contadores
+        if (resultsCount) {
+            resultsCount.textContent = `${total || 0} resultados encontrados`;
+        }
+        if (totalResultsEl) {
+            totalResultsEl.textContent = total || 0;
+        }
 
         // Limpiar resultados anteriores
         searchResults.innerHTML = '';
 
-        if (items.length === 0) {
+        if (!items || items.length === 0) {
             showNoResults();
             return;
         }
 
+        // Crear contenedor de resultados
+        const resultsContainer = document.createElement('div');
+        resultsContainer.className = 'row';
+        
         // Mostrar resultados
         items.forEach(news => {
             const newsCard = createNewsCard(news);
-            searchResults.appendChild(newsCard);
+            resultsContainer.appendChild(newsCard);
         });
+        
+        searchResults.appendChild(resultsContainer);
+        searchResults.classList.add('fade-in');
 
         // Mostrar filtros activos
         showActiveFilters();
@@ -254,35 +350,31 @@
         const card = document.createElement('div');
         card.className = 'col-md-6 col-lg-4 mb-4';
         
-        const imageUrl = parseFirstImage(news.imagenes || news.imagen_principal) || 'img/news-700x435-1.jpg';
+        const imageUrl = parseFirstImage(news.imagenes || news.imagen_principal || '') || '../img/news-700x435-1.jpg';
         const date = formatDate(news.fecha || news.created_at);
         const resumen = cleanContent(news.resumen || news.contenido || '');
+        const titulo = news.titulo || 'Sin título';
+        const categoria = news.categoria || 'General';
+        const fuente = news.fuente || 'Sin fuente';
         
         card.innerHTML = `
-            <div class="search-card">
-                <img src="${imageUrl}" class="card-img" alt="${news.titulo || 'Noticia'}">
-                <div class="card-body">
-                    <div class="mb-2">
-                        <span class="badge badge-primary mr-2">${news.categoria || 'General'}</span>
-                        <span class="badge badge-secondary mr-2">${news.fuente || 'Sin fuente'}</span>
-                        <small class="text-muted">${date}</small>
-                    </div>
-                    <h5 class="card-title">
-                        <a href="detalle_noticias.html?id=${news.id}" class="text-decoration-none text-dark">
-                            ${news.titulo || 'Sin título'}
-                        </a>
-                    </h5>
-                    <p class="card-text">${resumen.length > 150 ? resumen.substring(0, 150) + '...' : resumen}</p>
-                    <div class="card-meta">
-                        <div>
-                            <small class="text-muted">
-                                <i class="fa fa-calendar mr-1"></i>${date}
-                            </small>
+            <div class="news-card">
+                <img src="${imageUrl}" class="news-image" alt="${titulo}" 
+                     onerror="this.src='../img/news-700x435-1.jpg'">
+                <div class="news-content">
+                    <div class="news-category">${categoria}</div>
+                    <h3 class="news-title">
+                        <a href="../page/detalle_noticias.html?id=${news.id}">${titulo}</a>
+                    </h3>
+                    <p class="news-summary">${resumen.length > 150 ? resumen.substring(0, 150) + '...' : resumen}</p>
+                    <div class="news-meta">
+                        <div class="news-author">
+                            <i class="fas fa-rss"></i>
+                            <span>${fuente}</span>
                         </div>
-                        <div>
-                            <a href="detalle_noticias.html?id=${news.id}" class="btn btn-sm btn-outline-primary">
-                                Leer más
-                            </a>
+                        <div class="news-date">
+                            <i class="fas fa-calendar"></i>
+                            <span>${date}</span>
                         </div>
                     </div>
                 </div>
@@ -292,62 +384,37 @@
         return card;
     }
 
-    function updateStats(total, displayed) {
-        searchStats.innerHTML = `
-            <div class="search-stats">
-                <div class="stat-item">
-                    <span class="stat-number">${total}</span> resultados encontrados
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${displayed}</span> mostrados
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${Object.keys(currentFilters).length}</span> filtros activos
-                </div>
-            </div>
-        `;
-    }
-
     function showActiveFilters() {
+        if (!activeFiltersEl || !filterTagsEl) return;
+        
         const activeFilters = Object.entries(currentFilters)
-            .filter(([key, value]) => value !== null && value !== undefined && value !== '')
+            .filter(([key, value]) => value !== null && value !== undefined && value !== '' && key !== 'limit' && key !== 'order')
             .map(([key, value]) => ({ key, value }));
 
-        if (activeFilters.length === 0) return;
+        if (activeFilters.length === 0) {
+            activeFiltersEl.style.display = 'none';
+            return;
+        }
 
-        const filtersContainer = document.createElement('div');
-        filtersContainer.className = 'active-filters';
-        filtersContainer.innerHTML = `
-            <h6>Filtros activos:</h6>
-            <div class="filter-tags">
-                ${activeFilters.map(filter => `
-                    <span class="filter-tag">
-                        ${getFilterDisplayName(filter.key)}: ${filter.value}
-                        <span class="remove" onclick="removeFilter('${filter.key}')">&times;</span>
-                    </span>
-                `).join('')}
-            </div>
-        `;
-
-        searchResults.insertBefore(filtersContainer, searchResults.firstChild);
+        activeFiltersEl.style.display = 'block';
+        filterTagsEl.innerHTML = activeFilters.map(filter => `
+            <span class="filter-tag">
+                ${getFilterDisplayName(filter.key)}: ${filter.value}
+                <span class="remove" onclick="removeFilter('${filter.key}')">&times;</span>
+            </span>
+        `).join('');
     }
 
     function getFilterDisplayName(key) {
         const names = {
-            'q': 'Texto',
-            'keywords': 'Palabras clave',
+            'q': 'Palabras clave',
             'fuente': 'Fuente',
             'categoria': 'Categoría',
-            'dominio': 'Dominio',
             'anio': 'Año',
             'mes': 'Mes',
-            'dia_semana': 'Día',
-            'tipo_contenido': 'Tipo',
-            'tiene_imagenes': 'Imágenes',
-            'longitud_titulo_min': 'Título min',
-            'longitud_titulo_max': 'Título max',
-            'fecha_desde': 'Desde',
-            'fecha_hasta': 'Hasta'
+            'dia_semana': 'Día de la semana',
+            'fecha_desde': 'Fecha desde',
+            'fecha_hasta': 'Fecha hasta'
         };
         return names[key] || key;
     }
@@ -358,20 +425,14 @@
         
         // Limpiar campo del formulario
         const fieldMap = {
-            'q': 'searchText',
-            'keywords': 'searchKeywords',
+            'q': 'query',
             'fuente': 'fuente',
             'categoria': 'categoria',
-            'dominio': 'dominio',
             'anio': 'anio',
             'mes': 'mes',
-            'dia_semana': 'diaSemana',
-            'tipo_contenido': 'tipoContenido',
-            'tiene_imagenes': 'tieneImagenes',
-            'longitud_titulo_min': 'longitudTituloMin',
-            'longitud_titulo_max': 'longitudTituloMax',
-            'fecha_desde': 'fechaDesde',
-            'fecha_hasta': 'fechaHasta'
+            'dia_semana': 'dia_semana',
+            'fecha_desde': 'fecha_desde',
+            'fecha_hasta': 'fecha_hasta'
         };
 
         const fieldId = fieldMap[key];
@@ -387,46 +448,77 @@
     }
 
     function clearAllFilters() {
+        if (!searchForm) return;
+        
         // Limpiar todos los campos del formulario
         searchForm.reset();
-        
-        // Restablecer valores por defecto
-        initializeForm();
         
         // Limpiar filtros actuales
         currentFilters = {};
         
         // Limpiar resultados
-        searchResults.innerHTML = '';
-        searchStats.innerHTML = '';
-        hideNoResults();
+        if (searchResults) {
+            searchResults.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="empty-title">Realiza una búsqueda</h3>
+                    <p class="empty-description">Usa los filtros de arriba para encontrar noticias específicas</p>
+                </div>
+            `;
+        }
+        
+        // Ocultar filtros activos
+        if (activeFiltersEl) {
+            activeFiltersEl.style.display = 'none';
+        }
+        
+        // Actualizar contadores
+        if (resultsCount) {
+            resultsCount.textContent = '0 resultados encontrados';
+        }
+        if (totalResultsEl) {
+            totalResultsEl.textContent = '-';
+        }
     }
 
     function showLoading() {
-        loadingSpinner.style.display = 'block';
-        searchResults.style.display = 'none';
-        noResults.style.display = 'none';
+        if (!searchResults) return;
+        searchResults.innerHTML = `
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <div class="loading-text">Buscando noticias...</div>
+            </div>
+        `;
     }
 
     function hideLoading() {
-        loadingSpinner.style.display = 'none';
-        searchResults.style.display = 'block';
+        // Se maneja en displayResults
     }
 
     function showNoResults() {
-        noResults.style.display = 'block';
-        searchResults.style.display = 'none';
-    }
-
-    function hideNoResults() {
-        noResults.style.display = 'none';
+        if (!searchResults) return;
+        searchResults.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 class="empty-title">No se encontraron resultados</h3>
+                <p class="empty-description">Intenta ajustar los filtros de búsqueda o usar términos diferentes</p>
+            </div>
+        `;
     }
 
     function showError(message) {
+        if (!searchResults) return;
         searchResults.innerHTML = `
-            <div class="alert alert-danger" role="alert">
-                <i class="fa fa-exclamation-triangle mr-2"></i>
-                ${message}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                </div>
+                <h3 class="empty-title">Error</h3>
+                <p class="empty-description">${message}</p>
             </div>
         `;
     }

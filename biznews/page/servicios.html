@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes y Servicios - BizNews</title>
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="Elige el plan perfecto para acceder a nuestra API de noticias. Desde el plan gratuito hasta soluciones empresariales personalizadas.">
+    <meta name="keywords" content="API noticias, planes, precios, servicios, scraping, noticias API">
+    <meta name="author" content="BizNews">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Planes y Servicios - BizNews">
+    <meta property="og:description" content="Elige el plan perfecto para acceder a nuestra API de noticias">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--gray-800);
+            background-color: var(--gray-50);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand:hover {
+            color: var(--gray-100) !important;
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 0.75rem 1rem !important;
+            border-radius: var(--radius);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .navbar-toggler {
+            border: none;
+            color: white;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 4rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.1;
+        }
+
+        .page-header .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .page-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        /* Pricing Cards */
+        .pricing-section {
+            padding: 4rem 0;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 2px solid var(--gray-200);
+            padding: 2.5rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--gray-300);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .pricing-card.free::before {
+            background: linear-gradient(90deg, var(--success) 0%, #059669 100%);
+        }
+
+        .pricing-card.pro::before {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+
+        .pricing-card.business::before {
+            background: linear-gradient(90deg, var(--warning) 0%, #d97706 100%);
+        }
+
+        .pricing-card.enterprise::before {
+            background: linear-gradient(90deg, var(--danger) 0%, #dc2626 100%);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--primary);
+            transform: scale(1.05);
+            z-index: 1;
+        }
+
+        .pricing-card.featured::after {
+            content: '⭐ Popular';
+            position: absolute;
+            top: 1rem;
+            right: -2rem;
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 2.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transform: rotate(45deg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .plan-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .plan-badge.free {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .plan-badge.pro {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .plan-badge.business {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .plan-badge.enterprise {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .plan-name {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--gray-900);
+        }
+
+        .plan-description {
+            color: var(--gray-600);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .plan-price {
+            margin-bottom: 2rem;
+        }
+
+        .price-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1;
+        }
+
+        .price-period {
+            font-size: 1rem;
+            color: var(--gray-500);
+            margin-left: 0.5rem;
+        }
+
+        .plan-features {
+            flex: 1;
+            margin-bottom: 2rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            color: var(--success);
+            font-size: 1.125rem;
+            margin-top: 0.125rem;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        .feature-label {
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .plan-benefits {
+            background: var(--gray-50);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+        }
+
+        .benefits-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefit-item {
+            padding: 0.5rem 0;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .benefit-item::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        .plan-ideal {
+            background: var(--gray-50);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+        }
+
+        .ideal-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ideal-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .ideal-tag {
+            background: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-200);
+        }
+
+        .plan-button {
+            width: 100%;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .plan-button.free {
+            background: var(--success);
+            color: white;
+        }
+
+        .plan-button.free:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .plan-button.pro {
+            background: var(--primary);
+            color: white;
+        }
+
+        .plan-button.pro:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .plan-button.business {
+            background: var(--warning);
+            color: white;
+        }
+
+        .plan-button.business:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .plan-button.enterprise {
+            background: var(--danger);
+            color: white;
+        }
+
+        .plan-button.enterprise:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Section Title */
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+        }
+
+        .section-title p {
+            font-size: 1.125rem;
+            color: var(--gray-600);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .pricing-card.featured::after {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .page-subtitle {
+                font-size: 1rem;
+            }
+
+            .pricing-section {
+                padding: 2rem 0;
+            }
+
+            .pricing-card {
+                padding: 2rem;
+                margin-bottom: 2rem;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Payment Method Cards */
+        .payment-method-card {
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .payment-method-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .payment-method-card.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+        
+        .payment-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+        
+        .payment-method-card h6 {
+            margin: 0.5rem 0 0.25rem 0;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .payment-form {
+            background: var(--gray-50);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            margin-top: 1rem;
+        }
+        
+        /* Modal Pages - Navegación entre páginas */
+        .modal-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            background: white;
+            min-height: 100%;
+        }
+        
+        .modal-page.active {
+            position: relative;
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+        
+        .modal-page.prev {
+            transform: translateX(-100%);
+        }
+        
+        /* Indicador de progreso */
+        .progress-container {
+            width: 100%;
+        }
+        
+        .step-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            flex: 0 0 auto;
+        }
+        
+        .step-indicator.active {
+            color: white;
+        }
+        
+        .step-indicator i {
+            font-size: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .step-indicator.active i {
+            background: white;
+            color: var(--primary);
+        }
+        
+        .step-indicator.completed i {
+            background: var(--success);
+            color: white;
+        }
+        
+        .progress-line {
+            flex: 1;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 0 1rem;
+            position: relative;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: white;
+            transition: width 0.4s ease;
+        }
+        
+        .progress-line.completed::after {
+            width: 100%;
+        }
+        
+        /* Comparison Table */
+        .table-responsive {
+            margin-top: 2rem;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: var(--gray-800);
+            border-bottom: 2px solid var(--gray-300);
+        }
+        
+        .table td {
+            vertical-align: middle;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: var(--gray-50);
+        }
+        
+        .table-bordered {
+            border: 1px solid var(--gray-200);
+        }
+        
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid var(--gray-200);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <div id="navigation-container"></div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12 text-center">
+                    <h1 class="page-title">Planes y Servicios</h1>
+                    <p class="page-subtitle">Elige el plan perfecto para acceder a nuestra API de noticias</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Section -->
+    <div class="pricing-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Planes Disponibles</h2>
+                <p>Desde el plan gratuito hasta soluciones empresariales personalizadas, tenemos el plan perfecto para ti</p>
+            </div>
+
+            <!-- Servicio Público -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="content-card" style="background: linear-gradient(135deg, var(--success) 0%, #059669 100%); color: white; padding: 2rem;">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h3 style="color: white; margin-bottom: 1rem;">
+                                    <i class="fas fa-globe"></i> Servicio Público Gratuito
+                                </h3>
+                                <p style="color: rgba(255,255,255,0.9); margin-bottom: 1rem;">
+                                    Acceso ilimitado a nuestro sitio web público. Visualiza noticias, busca por fuente y categoría, y explora reportes y estadísticas. Completamente gratis, sin necesidad de registro.
+                                </p>
+                                <ul style="list-style: none; padding: 0; color: rgba(255,255,255,0.9);">
+                                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check-circle"></i> Acceso ilimitado al sitio web</li>
+                                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check-circle"></i> Búsqueda básica por fuente y categoría</li>
+                                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check-circle"></i> Reportes y estadísticas públicas</li>
+                                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check-circle"></i> Sin necesidad de registro</li>
+                                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-times-circle" style="opacity: 0.7;"></i> <span style="opacity: 0.8;">Búsqueda avanzada (requiere cuenta)</span></li>
+                                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-times-circle" style="opacity: 0.7;"></i> <span style="opacity: 0.8;">Noticias con IA (solo planes premium)</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <a href="../index.html" class="plan-button" style="background: white; color: var(--success); margin-top: 1rem;">Acceder Gratis</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title" style="margin-top: 3rem;">
+                <h3>Planes para Usuarios Registrados</h3>
+                <p>Acceso a funcionalidades avanzadas: búsqueda avanzada, API REST y noticias procesadas con IA</p>
+            </div>
+            
+            <!-- Información sobre Restricciones -->
+            <div class="alert alert-info mb-4" style="max-width: 1200px; margin: 0 auto 2rem;">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-info-circle fa-2x me-3 mt-1"></i>
+                    <div>
+                        <h5 class="alert-heading mb-2">Información Importante sobre Acceso</h5>
+                        <ul class="mb-0" style="padding-left: 1.5rem;">
+                            <li><strong>Búsqueda Avanzada:</strong> Disponible para <strong>todos los usuarios autenticados</strong> (incluyendo plan FREE). Permite filtrar por múltiples criterios: palabras clave, fuente, categoría, fecha, año, mes, día de la semana, etc.</li>
+                            <li><strong>Noticias con IA:</strong> Solo disponible para usuarios con plan <strong>Enterprise</strong> (y administradores). Incluye procesamiento inteligente de contenido, identificación de párrafos relevantes y análisis de relevancia usando modelos de lenguaje avanzados.</li>
+                            <li><strong>Servicio Público:</strong> Acceso gratuito sin registro al sitio web, búsqueda básica y reportes públicos.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Plan FREE -->
+                <div class="col-lg-6 col-xl-3">
+                    <div class="pricing-card free">
+                        <span class="plan-badge free">🟩 PLAN FREE</span>
+                        <h3 class="plan-name">Starter</h3>
+                        <p class="plan-description">API REST para desarrolladores que quieren integrar noticias en sus aplicaciones. Perfecto para pruebas y proyectos pequeños.</p>
+                        
+                        <div class="plan-price">
+                            <span class="price-amount">Gratis</span>
+                        </div>
+                        <!--
+                        <div class="plan-features">
+                            <div style="background: var(--gray-50); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                                <strong style="color: var(--gray-800);">Endpoints Disponibles:</strong>
+                                <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 0.5rem; font-family: monospace;">
+                                    GET /news<br>
+                                    GET /news/{id}<br>
+                                    GET /news/fuentes/{fuente}<br>
+                                    GET /news/categorias/{cat}<br>
+                                    GET /news/fuentes/listar<br>
+                                    GET /news/categorias/listar
+                                </div>
+                            </div>
+                            <ul class="feature-list">
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Límite:</strong> 50 noticias/día por API Key</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Fuentes:</strong> 1 fuente de noticias (seleccionable)</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Búsqueda:</strong> Simple por categoría</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>API Key:</strong> Estándar con autenticación</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Formato:</strong> JSON únicamente</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Actualización:</strong> Cada 3 horas</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-times-circle" style="color: var(--gray-400);"></i>
+                                    <span class="feature-text" style="color: var(--gray-500);">Historial: NO disponible</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-times-circle" style="color: var(--gray-400);"></i>
+                                    <span class="feature-text" style="color: var(--gray-500);">Webhooks: NO</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-times-circle" style="color: var(--gray-400);"></i>
+                                    <span class="feature-text" style="color: var(--gray-500);">Descarga CSV: NO</span>
+                                </li>
+                            </ul>
+                        </div>
+                        -->
+                        <div class="plan-benefits">
+                            <div class="benefits-title">
+                                <i class="fas fa-star"></i>
+                                Beneficios
+                            </div>
+                            <ul class="benefits-list">
+                                <li class="benefit-item">Completamente gratis</li>
+                                <li class="benefit-item">Búsqueda avanzada disponible</li>
+                                <li class="benefit-item">API Key para integraciones</li>
+                                <li class="benefit-item">Ideal para pruebas y proyectos pequeños</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="plan-benefits" style="background: rgba(239, 68, 68, 0.1); margin-top: 1rem;">
+                            <div class="benefits-title" style="color: var(--danger);">
+                                <i class="fas fa-lock"></i>
+                                Restricciones
+                            </div>
+                            <ul class="benefits-list">
+                                <li style="color: var(--gray-600);">❌ Noticias con IA (solo Enterprise/Premium)</li>
+                            </ul>
+                        </div>
+
+                        <div class="plan-ideal">
+                            <div class="ideal-title">
+                                <i class="fas fa-user"></i>
+                                Ideal para:
+                            </div>
+                            <div class="ideal-tags">
+                                <span class="ideal-tag">Estudiantes</span>
+                                <span class="ideal-tag">Pruebas</span>
+                                <span class="ideal-tag">Apps personales</span>
+                            </div>
+                        </div>
+
+                        <button class="plan-button free" onclick="openSubscribeModal('free')">Comenzar Gratis</button>
+                    </div>
+                </div>
+
+                <!-- Plan PRO -->
+                <div class="col-lg-6 col-xl-3">
+                    <div class="pricing-card pro featured">
+                        <span class="plan-badge pro">🟩 PLAN PRO</span>
+                        <h3 class="plan-name">Profesional</h3>
+                        <p class="plan-description">Para desarrolladores, investigadores y pequeñas empresas que necesitan monitoreo básico de varias fuentes.</p>
+                        
+                        <div class="plan-price">
+                            <span class="price-amount">$5</span>
+                            <span class="price-period">/mes</span>
+                        </div>
+                        <!--    
+                        <div class="plan-features">
+                            <div style="background: var(--gray-50); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                                <strong style="color: var(--gray-800);">Endpoints Adicionales:</strong>
+                                <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 0.5rem; font-family: monospace;">
+                                    GET /api/advanced/search<br>
+                                    GET /news?q=keyword<br>
+                                    GET /news?date_from=...<br>
+                                    GET /news/export?format=csv
+                                </div>
+                            </div>
+                            <ul class="feature-list">
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Límite:</strong> 2,000 noticias/día</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Fuentes:</strong> Hasta 5 fuentes simultáneas</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Palabras clave:</strong> Hasta 20 personalizadas</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Actualización:</strong> Cada 1 hora</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Historial:</strong> 7 días de búsquedas guardadas</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>API Key:</strong> Avanzada con más rate limit</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Descarga:</strong> JSON / CSV</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Webhooks:</strong> 1 webhook activo</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Soporte:</strong> Por email</span>
+                                </li>
+                            </ul>
+                        </div>
+                        -->
+                        <div class="plan-benefits">
+                            <div class="benefits-title">
+                                <i class="fas fa-star"></i>
+                                Beneficios
+                            </div>
+                            <ul class="benefits-list">
+                                <li class="benefit-item">Monitorea varios medios a la vez</li>
+                                <li class="benefit-item">Búsqueda avanzada con múltiples filtros</li>
+                                <li class="benefit-item">Compatible con sistemas automáticos</li>
+                                <li class="benefit-item">Fácil integración con apps externas</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="plan-benefits" style="background: rgba(239, 68, 68, 0.1); margin-top: 1rem;">
+                            <div class="benefits-title" style="color: var(--danger);">
+                                <i class="fas fa-lock"></i>
+                                Restricciones
+                            </div>
+                            <ul class="benefits-list">
+                                <li style="color: var(--gray-600);">❌ Noticias con IA (solo Enterprise/Premium)</li>
+                            </ul>
+                        </div>
+
+                        <div class="plan-ideal">
+                            <div class="ideal-title">
+                                <i class="fas fa-user"></i>
+                                Ideal para:
+                            </div>
+                            <div class="ideal-tags">
+                                <span class="ideal-tag">Startups</span>
+                                <span class="ideal-tag">Medios pequeños</span>
+                                <span class="ideal-tag">Investigadores</span>
+                                <span class="ideal-tag">Proyectos académicos</span>
+                            </div>
+                        </div>
+
+                        <button class="plan-button pro" onclick="openSubscribeModal('pro')">Contratar Ahora</button>
+                    </div>
+                </div>
+
+                <!-- Plan BUSINESS -->
+                <div class="col-lg-6 col-xl-3">
+                    <div class="pricing-card business">
+                        <span class="plan-badge business">🟧 PLAN BUSINESS</span>
+                        <h3 class="plan-name">Corporativo</h3>
+                        <p class="plan-description">Para empresas que necesitan información en tiempo real, más fuentes y automatización.</p>
+                        
+                        <div class="plan-price">
+                            <span class="price-amount">$10</span>
+                            <span class="price-period">/mes</span>
+                        </div>
+
+                        <!--
+                        <div class="plan-features">
+                            <div style="background: var(--gray-50); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                                <strong style="color: var(--gray-800);">Endpoints Adicionales:</strong>
+                                <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 0.5rem; font-family: monospace;">
+                                    GET /api/metrics<br>
+                                    GET /api/stats<br>
+                                    POST /api/scrapers/run<br>
+                                    GET /api/dashboard/stats
+                                </div>
+                            </div>
+                            <ul class="feature-list">
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Límite:</strong> 20,000 noticias/día</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Fuentes:</strong> TODAS las fuentes disponibles</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Palabras clave:</strong> Ilimitadas</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Alertas:</strong> Email/Telegram/Slack</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Webhooks:</strong> Ilimitados</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Descarga:</strong> JSON, CSV, XML</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Historial:</strong> 1 año completo</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Actualización:</strong> Cada 15 minutos</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>API Key:</strong> Premium con rate limit alto</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Dashboards:</strong> Avanzados con gráficas</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Scraping:</strong> Bajo demanda (limitado)</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Soporte:</strong> Prioritario</span>
+                                </li>
+                            </ul>
+                        </div>
+                        -->
+                        <div class="plan-benefits">
+                            <div class="benefits-title">
+                                <i class="fas fa-star"></i>
+                                Beneficios
+                            </div>
+                            <ul class="benefits-list">
+                                <li class="benefit-item">Ideal para análisis de medios</li>
+                                <li class="benefit-item">Búsqueda avanzada completa</li>
+                                <li class="benefit-item">Seguimiento reputacional</li>
+                                <li class="benefit-item">Monitoreo de competidores</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="plan-benefits" style="background: rgba(239, 68, 68, 0.1); margin-top: 1rem;">
+                            <div class="benefits-title" style="color: var(--danger);">
+                                <i class="fas fa-lock"></i>
+                                Restricciones
+                            </div>
+                            <ul class="benefits-list">
+                                <li style="color: var(--gray-600);">❌ Noticias con IA (solo Enterprise/Premium)</li>
+                            </ul>
+                        </div>
+
+                        <div class="plan-ideal">
+                            <div class="ideal-title">
+                                <i class="fas fa-user"></i>
+                                Ideal para:
+                            </div>
+                            <div class="ideal-tags">
+                                <span class="ideal-tag">Agencias de marketing</span>
+                                <span class="ideal-tag">Comunicación</span>
+                                <span class="ideal-tag">Consultoras</span>
+                                <span class="ideal-tag">Analistas de datos</span>
+                            </div>
+                        </div>
+
+                        <button class="plan-button business" onclick="openSubscribeModal('business')">Contratar Ahora</button>
+                    </div>
+                </div>
+
+                <!-- Plan ENTERPRISE -->
+                <div class="col-lg-6 col-xl-3">
+                    <div class="pricing-card enterprise">
+                        <span class="plan-badge enterprise">🟥 PLAN ENTERPRISE</span>
+                        <h3 class="plan-name">A la Medida</h3>
+                        <p class="plan-description">Soluciones personalizadas para grandes empresas que requieren scraping especializado, análisis avanzado con IA y garantías contractuales. <strong>Incluye acceso exclusivo a Noticias con IA.</strong></p>
+                        
+                        <div class="plan-price">
+                            <span class="price-amount">$20+</span>
+                            <span class="price-period">/mes</span>
+                        </div>
+
+                        <!--
+                            <div class="plan-features">
+                            <div style="background: var(--gray-50); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                                <strong style="color: var(--gray-800);">Endpoints Exclusivos:</strong>
+                                <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 0.5rem; font-family: monospace;">
+                                    POST /api/scrapers/custom<br>
+                                    POST /api/integrations/db<br>
+                                    POST /api/ai/analyze<br>
+                                    GET /api/export/bulk
+                                </div>
+                            </div>
+                            <ul class="feature-list">
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Noticias:</strong> Ilimitadas (o límite personalizado)</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Scraping:</strong> Personalizado para nuevas páginas</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Integración:</strong> Con bases de datos internas</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>IA integrada:</strong> Resumen automático, clasificación por sentimiento, detección de entidades</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Historial:</strong> Completo de datos (sin límites)</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Exportación:</strong> JSON, CSV, XML, Parquet</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Frecuencia:</strong> Cada 5 minutos</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>SLA:</strong> Garantizado (99.9% uptime)</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Escalado:</strong> Infraestructura dedicada</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span class="feature-text"><strong>Soporte:</strong> 24/7 y gestor de cuenta dedicado</span>
+                                </li>
+                            </ul>
+                        </div>
+                        -->
+                        <div class="plan-benefits">
+                            <div class="benefits-title">
+                                <i class="fas fa-star"></i>
+                                Beneficios
+                            </div>
+                            <ul class="benefits-list">
+                                <li class="benefit-item">Totalmente flexible</li>
+                                <li class="benefit-item">Sin límites operativos</li>
+                                <li class="benefit-item">✅ <strong>Noticias con IA</strong></li>
+                                <li class="benefit-item">Búsqueda avanzada completa</li>
+                                <li class="benefit-item">Análisis de contenido con modelos de lenguaje</li>
+                                <li class="benefit-item">Acceso a todas las funcionalidades premium</li>
+                            </ul>
+                        </div>
+
+                        <div class="plan-benefits" style="background: rgba(68, 239, 105, 0.1); margin-top: 1rem;">
+                            <div class="benefits-title" style="color: var(--success);">
+                                <i class="fas fa-lock"></i>
+                                Sin Restricciones
+                            </div>
+                            <ul class="benefits-list">
+                                <li style="color: var(--gray-600);">✅ Sin restricciones</li>
+                            </ul>
+                        </div>
+
+                        <div class="plan-ideal">
+                            <div class="ideal-title">
+                                <i class="fas fa-user"></i>
+                                Ideal para:
+                            </div>
+                            <div class="ideal-tags">
+                                <span class="ideal-tag">Bancos</span>
+                                <span class="ideal-tag">Gobiernos</span>
+                                <span class="ideal-tag">Grandes corporaciones</span>
+                                <span class="ideal-tag">Medios internacionales</span>
+                            </div>
+                        </div>
+
+                        <button class="plan-button enterprise" onclick="openSubscribeModal('enterprise')">Contactar Ventas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla Comparativa -->
+    <div class="container mb-5">
+        <div class="content-card" style="padding: 2rem;">
+            <div class="section-title">
+                <h2>Comparación de Funcionalidades</h2>
+                <p>Revisa qué funcionalidades están disponibles en cada plan</p>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Funcionalidad</th>
+                            <th class="text-center">Público</th>
+                            <th class="text-center">FREE</th>
+                            <th class="text-center">PRO</th>
+                            <th class="text-center">BUSINESS</th>
+                            <th class="text-center">ENTERPRISE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="fas fa-globe me-2"></i> Acceso al sitio web</td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-search me-2"></i> Búsqueda básica</td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-filter me-2"></i> Búsqueda avanzada (requiere autenticación)</td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-robot me-2"></i> Noticias procesadas con IA</td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-key me-2"></i> API Key para integraciones</td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-chart-bar me-2"></i> Reportes y estadísticas</td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-user me-2"></i> Requiere registro</td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="alert alert-warning mt-4">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Nota:</strong> La búsqueda avanzada requiere autenticación (cualquier plan, incluyendo FREE). 
+                Las noticias procesadas con IA solo están disponibles para el plan Enterprise.
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-white">BizNews</h5>
+                    <p class="mb-0 text-muted">Tu fuente confiable de noticias actualizadas y verificadas.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-muted">&copy; 2025 BizNews. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Subscription Modal -->
+    <div class="modal fade" id="subscribeModal" tabindex="-1" aria-labelledby="subscribeModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="border-radius: var(--radius-xl); overflow: hidden;">
+                <!-- Header con indicador de progreso -->
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-radius: 0; padding: 1.5rem 2rem;">
+                    <div style="width: 100%;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="modal-title mb-0" id="subscribeModalLabel" style="color: white;">
+                                <i class="fas fa-user-plus me-2" id="modalIcon"></i>
+                                <span id="modalTitleText">Suscribirse al Plan <span id="selectedPlanName"></span></span>
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <!-- Indicador de progreso -->
+                        <div class="progress-container" style="margin-top: 1rem;">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="step-indicator active" id="step1Indicator">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Información</span>
+                                </span>
+                                <div class="progress-line" id="progressLine"></div>
+                                <span class="step-indicator" id="step2Indicator">
+                                    <i class="fas fa-circle"></i>
+                                    <span>Pago</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding: 0; position: relative; min-height: 400px;">
+                    <!-- Paso 1: Información del Usuario -->
+                    <div id="stepUserInfo" class="modal-page active">
+                        <div style="padding: 2rem;">
+                        <form id="subscribeForm">
+                            <input type="hidden" id="selectedPlan" name="plan">
+                            
+                            <div class="mb-3">
+                                <label for="subscribeEmail" class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    Email *
+                                </label>
+                                <input type="email" class="form-control" id="subscribeEmail" name="email" required placeholder="tu@email.com">
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="subscribeNombre" class="form-label">
+                                        <i class="fas fa-user me-2"></i>
+                                        Nombre *
+                                    </label>
+                                    <input type="text" class="form-control" id="subscribeNombre" name="nombre" required placeholder="Tu nombre">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="subscribeApellido" class="form-label">
+                                        <i class="fas fa-user me-2"></i>
+                                        Apellido
+                                    </label>
+                                    <input type="text" class="form-control" id="subscribeApellido" name="apellido" placeholder="Tu apellido">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="subscribePassword" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Contraseña *
+                                </label>
+                                <input type="password" class="form-control" id="subscribePassword" name="password" required placeholder="Mínimo 6 caracteres" minlength="6">
+                                <small class="text-muted">La contraseña debe tener al menos 6 caracteres</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="subscribePasswordConfirm" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Confirmar Contraseña *
+                                </label>
+                                <input type="password" class="form-control" id="subscribePasswordConfirm" name="passwordConfirm" required placeholder="Repite tu contraseña">
+                            </div>
+                            
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Plan seleccionado:</strong> <span id="planDisplayName"></span>
+                                <br>
+                                <small>Después del registro, recibirás tu API Key automáticamente.</small>
+                            </div>
+                            
+                            <div id="subscribeError" class="alert alert-danger d-none" role="alert"></div>
+                        </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Paso 2: Método de Pago -->
+                    <div id="stepPayment" class="modal-page">
+                        <div style="padding: 2rem;">
+                        <h5 class="mb-4">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Selecciona tu método de pago
+                        </h5>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="payment-method-card" data-method="card">
+                                    <div class="payment-icon">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <h6>Tarjeta de Crédito/Débito</h6>
+                                    <small class="text-muted">Visa, Mastercard, Amex</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="payment-method-card" data-method="paypal">
+                                    <div class="payment-icon">
+                                        <i class="fab fa-paypal"></i>
+                                    </div>
+                                    <h6>PayPal</h6>
+                                    <small class="text-muted">Pago rápido y seguro</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="payment-method-card" data-method="transfer">
+                                    <div class="payment-icon">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <h6>Transferencia Bancaria</h6>
+                                    <small class="text-muted">Transferencia directa</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="payment-method-card" data-method="crypto">
+                                    <div class="payment-icon">
+                                        <i class="fab fa-bitcoin"></i>
+                                    </div>
+                                    <h6>Criptomonedas</h6>
+                                    <small class="text-muted">Bitcoin, Ethereum, USDT</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Formulario de pago (se muestra según el método seleccionado) -->
+                        <div id="paymentFormContainer" class="d-none">
+                            <div id="cardPaymentForm" class="payment-form d-none">
+                                <h6 class="mb-3">Información de la Tarjeta</h6>
+                                <div class="mb-3">
+                                    <label class="form-label">Número de Tarjeta</label>
+                                    <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Fecha de Vencimiento</label>
+                                        <input type="text" class="form-control" id="cardExpiry" placeholder="MM/AA" maxlength="5">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">CVV</label>
+                                        <input type="text" class="form-control" id="cardCVV" placeholder="123" maxlength="4">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre en la Tarjeta</label>
+                                    <input type="text" class="form-control" id="cardName" placeholder="Nombre completo">
+                                </div>
+                            </div>
+                            
+                            <div id="paypalPaymentForm" class="payment-form d-none">
+                                <div class="alert alert-info">
+                                    <i class="fab fa-paypal me-2"></i>
+                                    Serás redirigido a PayPal para completar el pago de forma segura.
+                                </div>
+                            </div>
+                            
+                            <div id="transferPaymentForm" class="payment-form d-none">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-university me-2"></i>
+                                    <strong>Datos para transferencia:</strong><br>
+                                    Banco: Banco de Ejemplo<br>
+                                    Cuenta: 1234567890<br>
+                                    CCI: 12345678901234567890<br>
+                                    <small>Envía el comprobante a pagos@biznews.com</small>
+                                </div>
+                            </div>
+                            
+                            <div id="cryptoPaymentForm" class="payment-form d-none">
+                                <div class="alert alert-info">
+                                    <i class="fab fa-bitcoin me-2"></i>
+                                    <strong>Dirección de pago:</strong><br>
+                                    <code id="cryptoAddress">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</code>
+                                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyCryptoAddress()">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <strong>Pago Simulado:</strong> Este es un entorno de demostración. No se realizará ningún cargo real.
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1.5rem 2rem;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn">Cancelar</button>
+                    <button type="button" class="btn btn-outline-primary d-none" id="backBtn" onclick="goBackToUserInfo()">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Volver
+                    </button>
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="handleNextButton()">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        Continuar
+                    </button>
+                    <button type="button" class="btn btn-success d-none" onclick="processPayment()" id="payBtn">
+                        <i class="fas fa-lock me-2"></i>
+                        Pagar y Suscribirse
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: var(--radius-xl);">
+                <div class="modal-body text-center" style="padding: 3rem 2rem;">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success);"></i>
+                    </div>
+                    <h4 class="mb-3">¡Registro y Sesión Exitosos!</h4>
+                    <div class="alert alert-info mb-3" role="alert">
+                        <i class="fas fa-user-check me-2"></i>
+                        <strong>Sesión iniciada como:</strong><br>
+                        <span id="verifiedUserName" style="font-weight: 600;"></span><br>
+                        <small id="verifiedUserEmail" class="text-muted"></small>
+                    </div>
+                    <p class="text-muted mb-4">Tu cuenta ha sido creada correctamente y tu sesión ha sido verificada. Tu API Key se ha generado automáticamente.</p>
+                    <div class="alert alert-success" role="alert">
+                        <strong><i class="fas fa-key me-2"></i>Tu API Key:</strong><br>
+                        <code id="generatedApiKey" style="font-size: 0.875rem; word-break: break-all; background: rgba(255,255,255,0.3); padding: 0.25rem 0.5rem; border-radius: 0.25rem;"></code>
+                        <button class="btn btn-sm btn-outline-success ms-2" onclick="copyApiKey()">
+                            <i class="fas fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                    <p class="text-muted small mb-4">
+                        <strong>⚠️ Importante:</strong> Guarda esta API Key en un lugar seguro. No la compartas públicamente.
+                    </p>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary btn-lg" onclick="goToDashboard()">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Ir al Panel de Administración
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Continuar Navegando
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/public-auth.js?v=1.0"></script>
+    <script src="../js/navigation.js?v=2.0"></script>
+    <script src="../js/subscribe.js"></script>
+    <script>
+        // Agregar event listeners a los botones como respaldo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, configurando botones de suscripción...');
+            
+            // Buscar todos los botones de planes
+            const buttons = document.querySelectorAll('.plan-button');
+            buttons.forEach(btn => {
+                // Extraer el plan del onclick si existe
+                const onclickAttr = btn.getAttribute('onclick');
+                if (onclickAttr) {
+                    const match = onclickAttr.match(/openSubscribeModal\(['"]([^'"]+)['"]\)/);
+                    if (match) {
+                        const plan = match[1];
+                        // Agregar event listener como respaldo
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Click en botón, plan:', plan);
+                            if (typeof window.openSubscribeModal === 'function') {
+                                window.openSubscribeModal(plan);
+                            } else {
+                                console.error('openSubscribeModal no está disponible');
+                                alert('Error: La función de suscripción no está disponible. Por favor, recarga la página.');
+                            }
+                        });
+                        console.log('Event listener agregado para plan:', plan);
+                    }
+                }
+            });
+            
+            // Verificar que las funciones estén disponibles
+            console.log('openSubscribeModal disponible:', typeof window.openSubscribeModal === 'function');
+        });
+    </script>
+</body>
+</html>
+

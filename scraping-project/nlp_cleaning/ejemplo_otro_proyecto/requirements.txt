@@ -1,0 +1,24 @@
+# Dependencias para el módulo Bot Dinámico
+# =========================================
+# Captura de audio
+sounddevice>=0.4.6
+soundfile>=0.12.1
+
+# Procesamiento de audio
+numpy>=1.24.0
+librosa>=0.10.0
+
+# Modelos de IA
+transformers>=4.30.0
+torch>=2.0.0
+openai-whisper>=20230918
+
+# Utilidades adicionales
+scipy>=1.10.0
+
+
+# Cliente HTTP para Ollama
+requests>=2.31.0
+
+# Nota: Este módulo también requiere las dependencias de voice_ai_module
+# Ver: models/voice_ai_module/requirements.txt

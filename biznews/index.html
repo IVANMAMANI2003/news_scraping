@@ -26,6 +26,7 @@
     
     <!-- Global CSS -->
     <link href="css/global.css" rel="stylesheet">
+    <link href="css/subscription-cta.css" rel="stylesheet">
     
     <!-- Custom CSS -->
     <style>
@@ -153,6 +154,7 @@
             font-weight: 700;
             margin-bottom: 1.5rem;
             line-height: 1.2;
+            color: white;
         }
 
         .hero-subtitle {
@@ -608,59 +610,7 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">
-                <i class="fas fa-newspaper"></i>
-                BizNews
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                        <a class="nav-link active" href="index.html">
-                            <i class="fas fa-home"></i>
-                            Inicio
-                        </a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="fuentes.html">
-                            <i class="fas fa-rss"></i>
-                            Fuentes
-                        </a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="categorias.html">
-                            <i class="fas fa-tags"></i>
-                            Categorías
-                        </a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="reportes.html">
-                            <i class="fas fa-chart-bar"></i>
-                            Reportes
-                        </a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="busqueda.html">
-                            <i class="fas fa-search"></i>
-                            Búsqueda
-                        </a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="contact.html">
-                            <i class="fas fa-envelope"></i>
-                            Contacto
-                        </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+    <div id="navigation-container"></div>
 
     <!-- Hero Section -->
     <div class="hero-section">
@@ -840,6 +790,10 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="js/news-api.js?v=2.2.3"></script>
+    <script src="js/public-auth.js?v=1.0"></script>
+    <script src="js/navigation.js?v=2.0"></script>
+    <script src="js/subscription-cta.js"></script>
+    <script src="js/news-api.js"></script>
 </body>
 </html>
+

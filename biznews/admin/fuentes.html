@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Fuentes - BizNews Admin</title>
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="Gestión completa de fuentes - BizNews Admin">
+    <meta name="keywords" content="admin, fuentes, gestión, CRUD">
+    <meta name="author" content="BizNews">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Global CSS -->
+    <link href="../css/global.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    
+    <style>
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .source-item {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .source-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+    </style>
+    
+    <!-- Auth Script (must load first to protect page) -->
+    <script src="js/auth.js"></script>
+    <!-- Sidebar Script (must load before sidebar initialization) -->
+    <script src="js/sidebar.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top admin-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-newspaper"></i>
+                BizNews <span class="badge bg-warning text-dark ms-2">Admin</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">
+                            <i class="fas fa-home"></i>
+                            Página Pública
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="userMenu">
+                            <i class="fas fa-user-circle"></i>
+                            Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Toggle Button (Mobile) -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Admin Layout -->
+    <div class="admin-layout">
+        <!-- Sidebar Menu -->
+                <!-- Sidebar Menu (generado dinámicamente por sidebar.js) -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <!-- El contenido se genera automáticamente por sidebar.js -->
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <!-- Hero Section -->
+            <div class="hero-section admin-hero mb-4" style="color: white !important;">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <div class="hero-content" style="color: white !important;">
+                                <h1 class="hero-title" style="color: white !important;">
+                                    <i class="fas fa-rss me-3" style="color: white !important;"></i>
+                                    Gestión de Fuentes
+                                </h1>
+                                <p class="hero-subtitle" style="color: rgba(255, 255, 255, 0.95) !important;">
+                                    Administra las fuentes de noticias del sistema
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 text-end">
+                            <button class="btn btn-primary btn-lg" onclick="openCreateModal()">
+                                <i class="fas fa-plus me-2"></i>
+                                Nueva Fuente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="container-fluid">
+                <!-- Sources List -->
+                <div class="content-card">
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">
+                                <i class="fas fa-list text-primary me-2"></i>
+                                Fuentes Disponibles
+                            </h4>
+                            <button class="btn btn-sm btn-outline-primary" onclick="loadSources()">
+                                <i class="fas fa-sync-alt me-1"></i>
+                                Actualizar
+                            </button>
+                        </div>
+                        
+                        <div id="sourcesList">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div class="modal fade" id="sourceModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Nueva Fuente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sourceForm">
+                        <input type="hidden" id="sourceOldName">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nombre de la Fuente *</label>
+                            <input type="text" class="form-control" id="sourceNombre" required>
+                            <small class="text-muted">Este nombre se aplicará a las noticias que se creen con esta fuente</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" id="sourceDescripcion" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">URL Base</label>
+                            <input type="url" class="form-control" id="sourceUrlBase" placeholder="https://ejemplo.com">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSource()">
+                        <i class="fas fa-save me-2"></i>
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar esta fuente?</p>
+                    <p class="text-muted"><strong id="deleteSourceName"></strong></p>
+                    <p class="text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Esto establecerá la fuente como NULL en todas las noticias asociadas.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                        <i class="fas fa-trash me-2"></i>
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="notificationToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                <strong class="me-auto">BizNews Admin</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/fuentes.js?v=1.0"></script>
+    <script src="../js/subscription-cta.js"></script>
+    <script src="../js/public-auth.js?v=1.0"></script>
+    <script>
+        // Sidebar functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+            const adminContent = document.querySelector('.admin-content');
+
+            if (sidebarCollapseBtn && sidebar) {
+                sidebarCollapseBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('collapsed');
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+                    if (adminContent) {
+                        adminContent.style.marginLeft = isCollapsed ? '80px' : '280px';
+                        adminContent.style.width = isCollapsed ? 'calc(100% - 80px)' : 'calc(100% - 280px)';
+                    }
+                });
+                
+                const savedState = localStorage.getItem('sidebarCollapsed');
+                if (savedState === 'true') {
+                    sidebar.classList.add('collapsed');
+                    if (adminContent) {
+                        adminContent.style.marginLeft = '80px';
+                        adminContent.style.width = 'calc(100% - 80px)';
+                    }
+                }
+            }
+
+            if (sidebarToggle && sidebar && overlay) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                    overlay.classList.toggle('active');
+                });
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                });
+            }
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                        window.authManager.logout();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+

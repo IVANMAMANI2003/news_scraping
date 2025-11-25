@@ -23,6 +23,16 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        
+        # Deshabilitar caché COMPLETAMENTE para TODOS los archivos durante desarrollo
+        # Esto evita tener que usar ?v=X.X en los scripts
+        # Headers múltiples para máxima compatibilidad con todos los navegadores
+        # Se aplica a todos los archivos: HTML, JS, CSS, imágenes, JSON, etc.
+        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, private')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        
         super().end_headers()
 
     def do_OPTIONS(self):
@@ -31,9 +41,32 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        # If accessing root directory, redirect to index.html
-        if self.path == '/' or self.path == '':
-            self.path = '/index.html'
+        # List of public pages that should be in page/ folder
+        public_pages = [
+            'fuentes.html', 'categorias.html', 'busqueda.html',
+            'contact.html', 'detalle_noticias.html', 'category.html'
+        ]
+        
+        # Split path and query string to handle URLs with parameters
+        path_parts = self.path.split('?', 1)
+        path_only = path_parts[0]
+        query_string = path_parts[1] if len(path_parts) > 1 else ''
+        
+        # If accessing root directory, serve index.html from root
+        if path_only == '/' or path_only == '':
+            if query_string:
+                self.path = f'/index.html?{query_string}'
+            else:
+                self.path = '/index.html'
+        # If accessing a public page directly (without /page/), redirect to page/ folder
+        elif path_only.startswith('/') and not path_only.startswith('/page/') and not path_only.startswith('/admin/'):
+            filename = path_only.lstrip('/')
+            # Check if it's a public page
+            if filename in public_pages:
+                if query_string:
+                    self.path = f'/page/{filename}?{query_string}'
+                else:
+                    self.path = f'/page/{filename}'
         
         # Call parent method to handle the request
         super().do_GET()

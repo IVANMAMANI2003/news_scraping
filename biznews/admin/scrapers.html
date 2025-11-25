@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Scrapers - BizNews Admin</title>
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="Gestión de scrapers de noticias - BizNews Admin">
+    <meta name="keywords" content="admin, scrapers, scraping, noticias">
+    <meta name="author" content="BizNews">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Global CSS -->
+    <link href="../css/global.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    
+    <!-- Custom Styles for Scrapers Page -->
+    <style>
+        .scraper-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .scraper-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .scraper-option {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .scraper-option:hover {
+            border-color: #2563eb;
+            background-color: #f8f9ff;
+        }
+
+        .scraper-option.active {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .scraper-option input[type="radio"] {
+            margin-right: 0.75rem;
+        }
+
+        .source-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .source-checkbox:hover {
+            background-color: #f8f9fa;
+        }
+
+        .source-checkbox input[type="checkbox"] {
+            margin-right: 0.75rem;
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-scrape {
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-scrape:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .results-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-running {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-pending {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .progress-container {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .log-output {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .log-line {
+            margin-bottom: 0.25rem;
+        }
+
+        .log-success {
+            color: #10b981;
+        }
+
+        .log-error {
+            color: #ef4444;
+        }
+
+        .log-info {
+            color: #3b82f6;
+        }
+
+        .log-warning {
+            color: #f59e0b;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .stat-card p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+    </style>
+    
+    <!-- Auth Script (must load first to protect page) -->
+    <script src="js/auth.js"></script>
+    <!-- Sidebar Script (must load before sidebar initialization) -->
+    <script src="js/sidebar.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top admin-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-newspaper"></i>
+                BizNews <span class="badge bg-warning text-dark ms-2">Admin</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">
+                            <i class="fas fa-home"></i>
+                            Página Pública
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="userMenu">
+                            <i class="fas fa-user-circle"></i>
+                            Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Toggle Button (Mobile) -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Admin Layout -->
+    <div class="admin-layout">
+        <!-- Sidebar Menu -->
+                <!-- Sidebar Menu (generado dinámicamente por sidebar.js) -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <!-- El contenido se genera automáticamente por sidebar.js -->
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <!-- Hero Section -->
+            <div class="hero-section admin-hero mb-4" style="color: white !important;">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <div class="hero-content" style="color: white !important;">
+                                <h1 class="hero-title" style="color: white !important;">
+                                    <i class="fas fa-spider me-3" style="color: white !important;"></i>
+                                    Gestión de Scrapers
+                                </h1>
+                                <p class="hero-subtitle" style="color: rgba(255, 255, 255, 0.95) !important;">
+                                    Ejecuta scraping de noticias desde todas las fuentes o selecciona fuentes específicas
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="container-fluid">
+                <!-- Scraping Options -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="scraper-card">
+                            <h3 class="mb-4">
+                                <i class="fas fa-cog text-primary me-2"></i>
+                                Opciones de Scraping
+                            </h3>
+
+                            <!-- Scraping Type Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Tipo de Scraping:</label>
+                                
+                                <div class="scraper-option" onclick="selectScrapingType('complete')">
+                                    <input type="radio" name="scrapingType" id="typeComplete" value="complete" checked>
+                                    <label for="typeComplete" class="mb-0">
+                                        <strong><i class="fas fa-globe me-2"></i>Scraping Completo</strong>
+                                        <p class="text-muted mb-0 mt-1" style="font-size: 0.875rem;">
+                                            Extrae noticias de todas las fuentes disponibles
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div class="scraper-option" onclick="selectScrapingType('selected')">
+                                    <input type="radio" name="scrapingType" id="typeSelected" value="selected">
+                                    <label for="typeSelected" class="mb-0">
+                                        <strong><i class="fas fa-check-square me-2"></i>Fuentes Seleccionadas</strong>
+                                        <p class="text-muted mb-0 mt-1" style="font-size: 0.875rem;">
+                                            Selecciona las fuentes que deseas procesar
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div class="scraper-option" onclick="selectScrapingType('single')">
+                                    <input type="radio" name="scrapingType" id="typeSingle" value="single">
+                                    <label for="typeSingle" class="mb-0">
+                                        <strong><i class="fas fa-rss me-2"></i>Una Fuente Específica</strong>
+                                        <p class="text-muted mb-0 mt-1" style="font-size: 0.875rem;">
+                                            Procesa solo una fuente de noticias
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div class="scraper-option" onclick="selectScrapingType('date')">
+                                    <input type="radio" name="scrapingType" id="typeDate" value="date">
+                                    <label for="typeDate" class="mb-0">
+                                        <strong><i class="fas fa-calendar me-2"></i>Por Fecha</strong>
+                                        <p class="text-muted mb-0 mt-1" style="font-size: 0.875rem;">
+                                            Extrae noticias de una fecha específica
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div class="scraper-option" onclick="selectScrapingType('today')">
+                                    <input type="radio" name="scrapingType" id="typeToday" value="today">
+                                    <label for="typeToday" class="mb-0">
+                                        <strong><i class="fas fa-clock me-2"></i>Últimas del Día</strong>
+                                        <p class="text-muted mb-0 mt-1" style="font-size: 0.875rem;">
+                                            Extrae solo las noticias del día actual
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div class="scraper-option" onclick="selectScrapingType('yesterday')">
+                                    <input type="radio" name="scrapingType" id="typeYesterday" value="yesterday">
+                                    <label for="typeYesterday" class="mb-0">
+                                        <strong><i class="fas fa-calendar-day me-2"></i>Ayer</strong>
+                                        <p class="text-muted mb-0 mt-1" style="font-size: 0.875rem;">
+                                            Extrae noticias del día anterior
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div class="scraper-option" onclick="selectScrapingType('week')">
+                                    <input type="radio" name="scrapingType" id="typeWeek" value="week">
+                                    <label for="typeWeek" class="mb-0">
+                                        <strong><i class="fas fa-calendar-week me-2"></i>Última Semana</strong>
+                                        <p class="text-muted mb-0 mt-1" style="font-size: 0.875rem;">
+                                            Extrae noticias de los últimos 7 días
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div class="scraper-option" onclick="selectScrapingType('month')">
+                                    <input type="radio" name="scrapingType" id="typeMonth" value="month">
+                                    <label for="typeMonth" class="mb-0">
+                                        <strong><i class="fas fa-calendar-alt me-2"></i>Último Mes</strong>
+                                        <p class="text-muted mb-0 mt-1" style="font-size: 0.875rem;">
+                                            Extrae noticias de los últimos 30 días
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div class="scraper-option" onclick="selectScrapingType('dateRange')">
+                                    <input type="radio" name="scrapingType" id="typeDateRange" value="dateRange">
+                                    <label for="typeDateRange" class="mb-0">
+                                        <strong><i class="fas fa-calendar-check me-2"></i>Rango de Fechas</strong>
+                                        <p class="text-muted mb-0 mt-1" style="font-size: 0.875rem;">
+                                            Extrae noticias entre dos fechas específicas
+                                        </p>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Source Selection (for selected/single types) -->
+                            <div id="sourceSelection" style="display: none;">
+                                <label class="form-label fw-bold mb-3">Seleccionar Fuentes:</label>
+                                <div id="sourcesList"></div>
+                            </div>
+
+                            <!-- Single Source Selection -->
+                            <div id="singleSourceSelection" style="display: none;">
+                                <label class="form-label fw-bold mb-3">Seleccionar Fuente:</label>
+                                <select class="form-select" id="singleSourceSelect">
+                                    <option value="">-- Selecciona una fuente --</option>
+                                </select>
+                            </div>
+
+                            <!-- Date Selection -->
+                            <div id="dateSelection" style="display: none;">
+                                <label class="form-label fw-bold mb-3">Seleccionar Fecha:</label>
+                                <input type="date" class="form-control" id="scrapingDate">
+                            </div>
+
+                            <!-- Date Range Selection -->
+                            <div id="dateRangeSelection" style="display: none;">
+                                <label class="form-label fw-bold mb-3">Rango de Fechas:</label>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Fecha Inicio:</label>
+                                        <input type="date" class="form-control" id="scrapingDateStart">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Fecha Fin:</label>
+                                        <input type="date" class="form-control" id="scrapingDateEnd">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Advanced Filters Section -->
+                            <div class="mt-4 pt-4 border-top">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-filter text-primary me-2"></i>
+                                    Filtros Avanzados
+                                </h5>
+
+                                <!-- Limit Selection -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Cantidad de Noticias:</label>
+                                    <select class="form-select" id="scrapingLimit">
+                                        <option value="">Sin límite (todas las disponibles)</option>
+                                        <option value="5">Últimas 5 noticias</option>
+                                        <option value="10">Últimas 10 noticias</option>
+                                        <option value="20">Últimas 20 noticias</option>
+                                        <option value="50">Últimas 50 noticias</option>
+                                        <option value="100">Últimas 100 noticias</option>
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        Limita la cantidad de noticias a extraer. Si no se especifica, se extraerán todas las disponibles según el alcance elegido.
+                                    </small>
+                                </div>
+
+                                <!-- Source Filter (for date-based scrapings) -->
+                                <div id="sourceFilterSection" class="mb-3" style="display: none;">
+                                    <label class="form-label fw-bold">Filtrar por Fuente (Opcional):</label>
+                                    <select class="form-select" id="sourceFilter">
+                                        <option value="">Todas las fuentes</option>
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        Selecciona una fuente específica para filtrar los resultados. Deja en blanco para procesar todas las fuentes.
+                                    </small>
+                                </div>
+
+                                <!-- Category Filter -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Filtrar por Categoría (Opcional):</label>
+                                    <select class="form-select" id="categoryFilter">
+                                        <option value="">Todas las categorías</option>
+                                        <option value="Nacional">Nacional</option>
+                                        <option value="Internacional">Internacional</option>
+                                        <option value="Deportes">Deportes</option>
+                                        <option value="Política">Política</option>
+                                        <option value="Economía">Economía</option>
+                                        <option value="Tecnología">Tecnología</option>
+                                        <option value="Cultura">Cultura</option>
+                                        <option value="Entretenimiento">Entretenimiento</option>
+                                        <option value="Salud">Salud</option>
+                                        <option value="Educación">Educación</option>
+                                        <option value="General">General</option>
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        Filtra las noticias por una categoría específica. Deja en blanco para incluir todas las categorías.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="mt-4">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary btn-scrape" id="startScrapingBtn" onclick="startScraping()">
+                                        <i class="fas fa-play me-2"></i>
+                                        Iniciar Scraping
+                                    </button>
+                                    <button class="btn btn-danger" id="cancelScrapingBtn" onclick="cancelScraping()" style="display: none;">
+                                        <i class="fas fa-stop me-2"></i>
+                                        Cancelar Scraping
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Progress Container -->
+                            <div class="progress-container" id="progressContainer">
+                                <div class="progress mb-3" style="height: 25px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" 
+                                         id="progressBar" 
+                                         style="width: 0%">
+                                        0%
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <span id="progressText" class="text-muted">Preparando scraping...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Sidebar -->
+                    <div class="col-lg-4">
+                        <div class="scraper-card">
+                            <h4 class="mb-3">
+                                <i class="fas fa-chart-line text-primary me-2"></i>
+                                Estadísticas
+                            </h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <h3 id="totalScraped">0</h3>
+                                    <p>Noticias Extraídas</p>
+                                </div>
+                                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                    <h3 id="totalSources">4</h3>
+                                    <p>Fuentes Activas</p>
+                                </div>
+                                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                    <h3 id="lastScraping">-</h3>
+                                    <p>Último Scraping</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Migration Section -->
+                <div class="scraper-card">
+                    <div class="row">
+                        <div class="col-12">
+                            <h4>
+                                <i class="fas fa-exchange-alt text-primary me-2"></i>
+                                Migración de Datos
+                            </h4>
+                            <p class="text-muted mb-3">
+                                Migra noticias de la tabla <code>noticias</code> a <code>noticias_limpia</code> con normalización y limpieza de datos.
+                            </p>
+                            <div class="d-flex gap-2 mb-3">
+                                <button class="btn btn-primary" id="btnStartMigration" onclick="startMigration()">
+                                    <i class="fas fa-play me-2"></i>
+                                    Iniciar Migración
+                                </button>
+                                <button class="btn btn-outline-secondary" id="btnCheckMigration" onclick="checkMigrationStatus()" style="display: none;">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    Verificar Estado
+                                </button>
+                            </div>
+                            <div id="migrationStatus" style="display: none;">
+                                <div class="alert alert-info">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <strong>Estado:</strong>
+                                        <span id="migrationStatusText" class="ms-2">-</span>
+                                    </div>
+                                    <div class="progress mb-2" style="height: 25px;">
+                                        <div id="migrationProgress" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                             role="progressbar" style="width: 0%">0%</div>
+                                    </div>
+                                    <div id="migrationStep" class="small text-muted">-</div>
+                                </div>
+                                <div id="migrationLogs" class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.85rem;">
+                                    <!-- Logs aparecerán aquí -->
+                                </div>
+                                <div id="migrationResults" class="mt-3" style="display: none;">
+                                    <!-- Resultados aparecerán aquí -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Container -->
+                <div class="results-container" id="resultsContainer" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>
+                            <i class="fas fa-list text-primary me-2"></i>
+                            Resultados del Scraping
+                        </h4>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="clearResults()">
+                            <i class="fas fa-times me-1"></i>
+                            Limpiar
+                        </button>
+                    </div>
+                    <div id="resultsList"></div>
+                </div>
+
+                <!-- Log Output -->
+                <div class="scraper-card" id="logContainer" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>
+                            <i class="fas fa-terminal text-primary me-2"></i>
+                            Log de Ejecución
+                        </h4>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="clearLogs()">
+                            <i class="fas fa-times me-1"></i>
+                            Limpiar Logs
+                        </button>
+                    </div>
+                    <div class="log-output" id="logOutput"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11;">
+        <div id="notificationToast" class="toast fade hide" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                <strong class="me-auto">BizNews Admin</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage" style="cursor: pointer;">
+                Funcionalidad de logs en desarrollo
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/scrapers.js?v=1.0"></script>
+</body>
+</html>
+

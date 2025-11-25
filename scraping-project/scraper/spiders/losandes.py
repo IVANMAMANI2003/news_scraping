@@ -54,8 +54,12 @@ class LosAndesLocalScraper:
                     return None
     
     def extract_images(self, soup):
-        """Extrae imágenes de un artículo (máximo 2)"""
+        """Extrae imágenes de un artículo (máximo 2)
+        Busca en etiquetas img y también en estilos CSS (background-image)
+        """
         images = []
+        
+        # 1. Buscar en etiquetas <img>
         img_tags = soup.find_all('img')
         
         for img in img_tags:
@@ -83,7 +87,135 @@ class LosAndesLocalScraper:
                     
                     # Limitar a máximo 2 imágenes
                     if len(images) >= 2:
-                        break
+                        return images
+        
+        # 2. Buscar en atributos style con background-image
+        # Buscar elementos con atributo style que contenga background-image
+        all_elements = soup.find_all(True)  # Todos los elementos
+        
+        for elem in all_elements:
+            style_attr = elem.get('style', '')
+            if style_attr and ('background-image' in style_attr or 'background:' in style_attr):
+                # Extraer URL de background-image usando regex
+                # Patrón: background-image: url(...) o background: url(...)
+                bg_patterns = [
+                    r'background-image:\s*url\(["\']?([^"\')]+)["\']?\)',
+                    r'background:\s*url\(["\']?([^"\')]+)["\']?\)',
+                    r'background-image:\s*url\(([^)]+)\)',
+                    r'background:\s*url\(([^)]+)\)'
+                ]
+                
+                for pattern in bg_patterns:
+                    matches = re.findall(pattern, style_attr, re.IGNORECASE)
+                    for match in matches:
+                        # Limpiar la URL de comillas y espacios
+                        url = match.strip().strip('"\'').strip()
+                        if url and url.startswith('http'):
+                            if url not in images:
+                                images.append(url)
+                                if len(images) >= 2:
+                                    return images
+                        elif url and not url.startswith('data:'):
+                            # URL relativa, convertir a absoluta
+                            full_url = urljoin(self.base_url, url)
+                            if full_url not in images:
+                                # Filtrar por nombre de archivo
+                                if not any(skip in full_url.lower() for skip in ['icon', 'logo', 'avatar', 'button', 'banner']):
+                                    images.append(full_url)
+                                    if len(images) >= 2:
+                                        return images
+        
+        # 3. Buscar dentro de etiquetas <style> que contienen CSS
+        # Esto es importante porque muchas imágenes están definidas en CSS dentro de <style>
+        style_tags = soup.find_all('style')
+        
+        for style_tag in style_tags:
+            style_content = style_tag.string or ''
+            if style_content and ('background' in style_content.lower() or 'url(' in style_content.lower()):
+                # Buscar URLs en el contenido CSS
+                # Patrones para encontrar background: url(...) o background-image: url(...)
+                bg_patterns = [
+                    r'background-image:\s*url\(["\']?([^"\')]+)["\']?\)',
+                    r'background:\s*url\(["\']?([^"\')]+)["\']?\)',
+                    r'background-image:\s*url\(([^)]+)\)',
+                    r'background:\s*url\(([^)]+)\)',
+                    # Patrón más específico para .tdb-featured-image-bg o .tdi_85
+                    r'\.(?:tdb-featured-image-bg|tdi_\d+)[^{]*\{[^}]*background:\s*url\(["\']?([^"\')]+)["\']?\)',
+                    r'\.(?:tdb-featured-image-bg|tdi_\d+)[^{]*\{[^}]*background-image:\s*url\(["\']?([^"\')]+)["\']?\)',
+                ]
+                
+                for pattern in bg_patterns:
+                    matches = re.findall(pattern, style_content, re.IGNORECASE | re.DOTALL)
+                    for match in matches:
+                        # Limpiar la URL de comillas y espacios
+                        url = match.strip().strip('"\'').strip()
+                        if url and url.startswith('http'):
+                            if url not in images:
+                                # Filtrar por nombre de archivo
+                                if not any(skip in url.lower() for skip in ['icon', 'logo', 'avatar', 'button', 'banner', 'gradient']):
+                                    images.append(url)
+                                    if len(images) >= 2:
+                                        return images
+                        elif url and not url.startswith('data:') and not url.startswith('linear-gradient'):
+                            # URL relativa, convertir a absoluta
+                            full_url = urljoin(self.base_url, url)
+                            if full_url not in images:
+                                # Filtrar por nombre de archivo
+                                if not any(skip in full_url.lower() for skip in ['icon', 'logo', 'avatar', 'button', 'banner']):
+                                    images.append(full_url)
+                                    if len(images) >= 2:
+                                        return images
+        
+        # 4. Buscar en elementos con clases específicas de imágenes destacadas
+        # Buscar elementos con clases como .tdb-featured-image-bg, .tdi_85, etc.
+        featured_selectors = [
+            '.tdb-featured-image-bg',
+            '.tdi_85',
+            '.featured-image',
+            '.post-thumbnail',
+            '.article-image',
+            '[class*="featured"]',
+            '[class*="image-bg"]'
+        ]
+        
+        for selector in featured_selectors:
+            featured_elems = soup.select(selector)
+            for elem in featured_elems:
+                # Buscar en el atributo style
+                style_attr = elem.get('style', '')
+                if style_attr:
+                    bg_patterns = [
+                        r'background-image:\s*url\(["\']?([^"\')]+)["\']?\)',
+                        r'background:\s*url\(["\']?([^"\')]+)["\']?\)',
+                    ]
+                    for pattern in bg_patterns:
+                        matches = re.findall(pattern, style_attr, re.IGNORECASE)
+                        for match in matches:
+                            url = match.strip().strip('"\'').strip()
+                            if url and url.startswith('http'):
+                                if url not in images:
+                                    images.append(url)
+                                    if len(images) >= 2:
+                                        return images
+                            elif url and not url.startswith('data:'):
+                                full_url = urljoin(self.base_url, url)
+                                if full_url not in images:
+                                    if not any(skip in full_url.lower() for skip in ['icon', 'logo', 'avatar', 'button', 'banner']):
+                                        images.append(full_url)
+                                        if len(images) >= 2:
+                                            return images
+                
+                # También buscar imágenes dentro de estos elementos
+                img_in_elem = elem.find('img')
+                if img_in_elem:
+                    src = img_in_elem.get('src') or img_in_elem.get('data-src') or img_in_elem.get('data-lazy-src')
+                    if src:
+                        full_url = urljoin(self.base_url, src)
+                        if full_url not in images:
+                            if not any(skip in full_url.lower() for skip in ['icon', 'logo', 'avatar', 'button', 'banner']):
+                                images.append(full_url)
+                                if len(images) >= 2:
+                                    return images
         
         return images
     

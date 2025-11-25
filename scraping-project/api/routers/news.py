@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, time
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
@@ -67,6 +67,49 @@ def _row_to_news(row: tuple) -> News:
     )
 
 
+def _build_social_where(where: list[str], params: list[Any]) -> tuple[str, list[Any]]:
+    """Construye WHERE clause y parámetros para social_news (solo filtros aplicables)"""
+    social_where = []
+    social_params = []
+    param_idx = 0
+    
+    for condition in where:
+        if "titulo ILIKE" in condition:
+            social_where.append("titulo ILIKE %s")
+            social_params.append(params[param_idx])
+            param_idx += 1
+        elif "contenido ILIKE" in condition:
+            # No aplica a social_news, pero avanzamos el índice
+            param_idx += 1
+        elif "resumen ILIKE" in condition:
+            social_where.append("resumen ILIKE %s")
+            social_params.append(params[param_idx])
+            param_idx += 1
+        elif "categoria = %s" in condition:
+            social_where.append("categoria = %s")
+            social_params.append(params[param_idx])
+            param_idx += 1
+        elif "fuente = %s" in condition:
+            social_where.append("fuente = %s")
+            social_params.append(params[param_idx])
+            param_idx += 1
+        elif "fecha >=" in condition:
+            social_where.append("fecha >= %s")
+            social_params.append(params[param_idx])
+            param_idx += 1
+        elif "fecha <=" in condition:
+            social_where.append("fecha <= %s")
+            social_params.append(params[param_idx])
+            param_idx += 1
+        else:
+            # Otros filtros no aplican a social_news, pero avanzamos el índice
+            if "%s" in condition:
+                param_idx += condition.count("%s")
+    
+    social_where_sql = f"WHERE {' AND '.join(social_where)}" if social_where else ""
+    return social_where_sql, social_params
+
+
 @router.get("", response_model=NewsListResponse)
 def list_news(
     q: Optional[str] = Query(None, description="Texto a buscar en título, contenido o resumen"),
@@ -131,27 +174,93 @@ def list_news(
 
         where_sql = f"WHERE {' AND '.join(where)}" if where else ""
 
-        # Count
-        cur.execute(f"SELECT COUNT(*) FROM noticias_limpia {where_sql}", params)
-        total = cur.fetchone()[0]
+        # Count total de ambas tablas
+        count_query1 = f"SELECT COUNT(*) FROM noticias_limpia {where_sql}"
+        cur.execute(count_query1, params)
+        count1 = cur.fetchone()[0]
+        
+        # Count de social_news (solo filtros aplicables) - COMENTADO TEMPORALMENTE
+        # social_where_sql, social_params = _build_social_where(where, params)
+        # count_query2 = f"SELECT COUNT(*) FROM social_news {social_where_sql}"
+        # cur.execute(count_query2, social_params)
+        # count2 = cur.fetchone()[0]
+        
+        # total = count1 + count2
+        total = count1  # Solo contar noticias_limpia
 
-        # Data
+        # Data usando UNION ALL
         order_sql = "ASC" if order == "asc" else "DESC"
         effective_limit = limit if limit is not None else max(total - skip, 0)
-
-        cur.execute(
-            f"""
+        
+        # Query para noticias_limpia
+        query1 = f"""
             SELECT id, titulo, fecha, hora, anio, mes, dia, dia_semana, resumen, contenido, 
                    categoria, autor, keywords, url, dominio, fecha_extraccion, imagen_principal,
                    cantidad_imagenes, tiene_imagenes, fuente, longitud_titulo, longitud_resumen,
                    tipo_contenido, created_at
             FROM noticias_limpia
             {where_sql}
-            ORDER BY fecha {order_sql} NULLS LAST, id {order_sql}
+        """
+        
+        # Query para social_news (mapear campos faltantes) - COMENTADO TEMPORALMENTE
+        # query2 = f"""
+        #     SELECT 
+        #         id + 1000000 as id,  -- Offset para evitar conflictos de IDs
+        #         titulo,
+        #         fecha::timestamp as fecha,
+        #         NULL::time as hora,
+        #         EXTRACT(YEAR FROM fecha)::float as anio,
+        #         EXTRACT(MONTH FROM fecha)::float as mes,
+        #         EXTRACT(DAY FROM fecha)::float as dia,
+        #         TO_CHAR(fecha, 'Day') as dia_semana,
+        #         resumen,
+        #         resumen as contenido,  -- Usar resumen como contenido
+        #         categoria,
+        #         NULL as autor,
+        #         NULL as keywords,
+        #         url,
+        #         NULL as dominio,
+        #         created_at as fecha_extraccion,
+        #         imagen as imagen_principal,
+        #         CASE WHEN imagen IS NOT NULL THEN 1 ELSE 0 END as cantidad_imagenes,
+        #         CASE WHEN imagen IS NOT NULL THEN true ELSE false END as tiene_imagenes,
+        #         fuente,
+        #         LENGTH(titulo) as longitud_titulo,
+        #         LENGTH(resumen)::float as longitud_resumen,
+        #         'social' as tipo_contenido,
+        #         created_at
+        #     FROM social_news
+        #     {social_where_sql}
+        # """
+        
+        # UNION ALL para combinar ambas tablas - COMENTADO TEMPORALMENTE
+        # union_query = f"""
+        #     SELECT * FROM (
+        #         {query1}
+        #         UNION ALL
+        #         {query2}
+        #     ) AS combined_news
+        #     ORDER BY fecha {order_sql} NULLS LAST, id {order_sql}
+        #     OFFSET %s LIMIT %s
+        # """
+        
+        # Solo usar query1 (noticias_limpia) - COMENTADO social_news
+        # Ordenar por fecha (más recientes primero), si fecha es NULL usar fecha_extraccion o created_at como respaldo
+        union_query = f"""
+            {query1}
+            ORDER BY 
+                COALESCE(fecha, fecha_extraccion::date, created_at::date) {order_sql} NULLS LAST,
+                fecha_extraccion {order_sql} NULLS LAST,
+                created_at {order_sql} NULLS LAST,
+                id {order_sql}
             OFFSET %s LIMIT %s
-            """,
-            params + [skip, effective_limit],
-        )
+        """
+        
+        # Combinar parámetros: solo los de noticias_limpia, luego skip y limit
+        # final_params = params.copy() + social_params + [skip, effective_limit]
+        final_params = params.copy() + [skip, effective_limit]
+        
+        cur.execute(union_query, final_params)
         rows = cur.fetchall()
         items = [_row_to_news(r) for r in rows]
         return NewsListResponse(total=total, items=items)
@@ -203,14 +312,20 @@ def list_categorias():
 
 @router.get("/fuentes/listar", response_model=List[str])
 def list_fuentes():
-    """Obtiene la lista de todas las fuentes disponibles"""
+    """Obtiene la lista de todas las fuentes disponibles de noticias_limpia y social_news"""
     conn = get_conn()
     try:
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT DISTINCT fuente FROM noticias_limpia 
-            WHERE fuente IS NOT NULL AND fuente != ''
+            SELECT DISTINCT fuente 
+            FROM (
+                SELECT fuente FROM noticias_limpia 
+                WHERE fuente IS NOT NULL AND fuente != ''
+                UNION
+                SELECT fuente FROM social_news
+                WHERE fuente IS NOT NULL AND fuente != ''
+            ) AS combined_fuentes
             ORDER BY fuente
             """
         )
@@ -228,7 +343,7 @@ def get_news_by_fuente(
     order: str = Query("desc", regex="^(asc|desc)$"),
     fecha_desde: str = Query(None, description="Fecha desde (YYYY-MM-DD)"),
 ):
-    """Obtiene todas las noticias de una fuente específica"""
+    """Obtiene todas las noticias de una fuente específica de ambas tablas"""
     conn = get_conn()
     try:
         cur = conn.cursor()
@@ -241,30 +356,67 @@ def get_news_by_fuente(
             where_clause += " AND fecha >= %s"
             params.append(fecha_desde)
         
-        # Count
+        # Count de ambas tablas
         cur.execute(
             f"SELECT COUNT(*) FROM noticias_limpia WHERE {where_clause}",
             params
         )
-        total = cur.fetchone()[0]
+        count1 = cur.fetchone()[0]
         
-        # Data
+        cur.execute(
+            f"SELECT COUNT(*) FROM social_news WHERE {where_clause}",
+            params
+        )
+        count2 = cur.fetchone()[0]
+        
+        total = count1 + count2
+        
+        # Data usando UNION
         order_sql = "ASC" if order == "asc" else "DESC"
         effective_limit = limit if limit is not None else max(total - skip, 0)
 
-        cur.execute(
-            f"""
-            SELECT id, titulo, fecha, hora, anio, mes, dia, dia_semana, resumen, contenido, 
-                   categoria, autor, keywords, url, dominio, fecha_extraccion, imagen_principal,
-                   cantidad_imagenes, tiene_imagenes, fuente, longitud_titulo, longitud_resumen,
-                   tipo_contenido, created_at
-            FROM noticias_limpia
-            WHERE {where_clause}
+        query = f"""
+            SELECT * FROM (
+                SELECT id, titulo, fecha, hora, anio, mes, dia, dia_semana, resumen, contenido, 
+                       categoria, autor, keywords, url, dominio, fecha_extraccion, imagen_principal,
+                       cantidad_imagenes, tiene_imagenes, fuente, longitud_titulo, longitud_resumen,
+                       tipo_contenido, created_at
+                FROM noticias_limpia
+                WHERE {where_clause}
+                UNION ALL
+                SELECT 
+                    id + 1000000 as id,
+                    titulo,
+                    fecha::timestamp as fecha,
+                    NULL::time as hora,
+                    EXTRACT(YEAR FROM fecha)::float as anio,
+                    EXTRACT(MONTH FROM fecha)::float as mes,
+                    EXTRACT(DAY FROM fecha)::float as dia,
+                    TO_CHAR(fecha, 'Day') as dia_semana,
+                    resumen,
+                    resumen as contenido,
+                    categoria,
+                    NULL as autor,
+                    NULL as keywords,
+                    url,
+                    NULL as dominio,
+                    created_at as fecha_extraccion,
+                    imagen as imagen_principal,
+                    CASE WHEN imagen IS NOT NULL THEN 1 ELSE 0 END as cantidad_imagenes,
+                    CASE WHEN imagen IS NOT NULL THEN true ELSE false END as tiene_imagenes,
+                    fuente,
+                    LENGTH(titulo) as longitud_titulo,
+                    LENGTH(resumen)::float as longitud_resumen,
+                    'social' as tipo_contenido,
+                    created_at
+                FROM social_news
+                WHERE {where_clause}
+            ) AS combined_news
             ORDER BY fecha {order_sql} NULLS LAST, id {order_sql}
             OFFSET %s LIMIT %s
-            """,
-            params + [skip, effective_limit],
-        )
+        """
+        
+        cur.execute(query, params + params + [skip, effective_limit])
         rows = cur.fetchall()
         items = [_row_to_news(r) for r in rows]
         return NewsListResponse(total=total, items=items)

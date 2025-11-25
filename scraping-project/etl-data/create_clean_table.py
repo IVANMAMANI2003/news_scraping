@@ -88,7 +88,14 @@ def load_clean_data(conn, csv_file):
         
         cursor = conn.cursor()
         
+        # Contar registros existentes antes
+        cursor.execute("SELECT COUNT(*) FROM noticias_limpia")
+        count_before = cursor.fetchone()[0]
+        print(f"📊 Registros existentes en 'noticias_limpia': {count_before}")
+        
         # Preparar datos para inserción
+        # ON CONFLICT DO NOTHING: solo inserta nuevos registros, no actualiza ni elimina existentes
+        # El campo 'id' NO se incluye - se genera automáticamente de forma incremental (SERIAL)
         insert_query = """
         INSERT INTO noticias_limpia (
             titulo, fecha, hora, anio, mes, dia, dia_semana, resumen, contenido,
@@ -98,29 +105,7 @@ def load_clean_data(conn, csv_file):
         ) VALUES (
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
         )
-        ON CONFLICT (url) DO UPDATE SET
-            titulo = EXCLUDED.titulo,
-            fecha = EXCLUDED.fecha,
-            hora = EXCLUDED.hora,
-            anio = EXCLUDED.anio,
-            mes = EXCLUDED.mes,
-            dia = EXCLUDED.dia,
-            dia_semana = EXCLUDED.dia_semana,
-            resumen = EXCLUDED.resumen,
-            contenido = EXCLUDED.contenido,
-            categoria = EXCLUDED.categoria,
-            autor = EXCLUDED.autor,
-            keywords = EXCLUDED.keywords,
-            dominio = EXCLUDED.dominio,
-            fecha_extraccion = EXCLUDED.fecha_extraccion,
-            imagen_principal = EXCLUDED.imagen_principal,
-            cantidad_imagenes = EXCLUDED.cantidad_imagenes,
-            tiene_imagenes = EXCLUDED.tiene_imagenes,
-            fuente = EXCLUDED.fuente,
-            longitud_titulo = EXCLUDED.longitud_titulo,
-            longitud_resumen = EXCLUDED.longitud_resumen,
-            tipo_contenido = EXCLUDED.tipo_contenido,
-            created_at = EXCLUDED.created_at
+        ON CONFLICT (url) DO NOTHING
         """
         
         # Convertir DataFrame a lista de tuplas
@@ -186,16 +171,44 @@ def load_clean_data(conn, csv_file):
         
         # Insertar en lotes
         batch_size = 100
+        total_processed = 0
         total_inserted = 0
+        total_skipped = 0
         
         for i in range(0, len(data_tuples), batch_size):
             batch = data_tuples[i:i + batch_size]
+            try:
             cursor.executemany(insert_query, batch)
             conn.commit()
-            total_inserted += len(batch)
-            print(f"📝 Procesados {total_inserted}/{len(data_tuples)} registros...")
+                # Contar cuántos se insertaron realmente
+                inserted_in_batch = cursor.rowcount
+                total_inserted += inserted_in_batch
+                total_skipped += len(batch) - inserted_in_batch
+                total_processed += len(batch)
+                print(f"📝 Procesados {total_processed}/{len(data_tuples)} registros... (Insertados: {total_inserted}, Omitidos (duplicados): {total_skipped})")
+            except Exception as e:
+                print(f"⚠️  Error en lote {i//batch_size + 1}: {e}")
+                conn.rollback()
+                # Intentar insertar uno por uno
+                for record in batch:
+                    try:
+                        cursor.execute(insert_query, record)
+                        conn.commit()
+                        total_inserted += 1
+                    except:
+                        total_skipped += 1
+                        conn.rollback()
         
-        print(f"✅ {total_inserted} registros cargados exitosamente en noticias_limpia")
+        # Verificar total final
+        cursor.execute("SELECT COUNT(*) FROM noticias_limpia")
+        total_count = cursor.fetchone()[0]
+        new_records = total_count - count_before
+        
+        print(f"\n✅ Proceso completado:")
+        print(f"   📊 Registros antes: {count_before}")
+        print(f"   ➕ Registros nuevos insertados: {new_records}")
+        print(f"   ⏭️  Registros omitidos (duplicados por URL): {total_skipped}")
+        print(f"   📊 Total en noticias_limpia: {total_count}")
         return True
         
     except Exception as e:

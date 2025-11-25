@@ -365,6 +365,7 @@ def import_and_insert_from_scraper(module_name: str, source_name: str) -> int:
         cursor = conn.cursor()
         
         inserted_count = 0
+        updated_count = 0
         for article in news_data:
             try:
                 # Verificar si ya existe
@@ -372,20 +373,7 @@ def import_and_insert_from_scraper(module_name: str, source_name: str) -> int:
                 if not url:
                     continue
                 
-                cursor.execute("SELECT id FROM noticias WHERE url = %s", (url,))
-                if cursor.fetchone():
-                    continue  # Ya existe
-                
-                # Insertar
-                insert_query = """
-                INSERT INTO noticias (
-                    titulo, fecha, resumen, contenido, categoria, autor, 
-                    tags, url, fecha_extraccion, caracteres_contenido, 
-                    palabras_contenido, imagenes, fuente
-                ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                )
-                """
+                # Preparar datos del artículo
                 
                 contenido = article.get('contenido') or article.get('content') or article.get('texto') or ''
                 resumen = article.get('resumen') or article.get('summary') or article.get('excerpt') or ''
@@ -457,24 +445,82 @@ def import_and_insert_from_scraper(module_name: str, source_name: str) -> int:
                 # Fuente tiene límite 100 en la BD
                 fuente = source_name[:100]
 
-                values = (
-                    article.get('titulo') or article.get('title') or 'Sin título',
-                    fecha,
-                    resumen[:500] if resumen else None,
-                    contenido,
-                    categoria,
-                    autor,
-                    tags,
-                    url,
-                    datetime.datetime.now(),
-                    len(contenido),
-                    len(contenido.split()) if contenido else 0,
-                    imagenes,
-                    fuente
-                )
+                # Verificar si ya existe
+                cursor.execute("SELECT id, imagenes FROM noticias WHERE url = %s", (url,))
+                existing = cursor.fetchone()
                 
-                cursor.execute(insert_query, values)
-                inserted_count += 1
+                if existing:
+                    # Ya existe - SIEMPRE actualizar cuando hay duplicados
+                    # Esto asegura que el campo "imagenes" se reemplace con los nuevos datos
+                    existing_id, existing_imagenes = existing
+                    
+                    # Actualizar siempre el campo imagenes si hay duplicados
+                    # Reemplazar con lo que viene del nuevo scraping (aunque sea una URL que no sea imagen)
+                    update_query = """
+                    UPDATE noticias SET
+                        titulo = %s,
+                        fecha = %s,
+                        resumen = %s,
+                        contenido = %s,
+                        categoria = %s,
+                        autor = %s,
+                        tags = %s,
+                        fecha_extraccion = %s,
+                        caracteres_contenido = %s,
+                        palabras_contenido = %s,
+                        imagenes = %s,
+                        fuente = %s
+                    WHERE id = %s
+                    """
+                    
+                    update_values = (
+                        article.get('titulo') or article.get('title') or 'Sin título',
+                        fecha,
+                        resumen[:500] if resumen else None,
+                        contenido,
+                        categoria,
+                        autor,
+                        tags,
+                        datetime.datetime.now(),
+                        len(contenido),
+                        len(contenido.split()) if contenido else 0,
+                        imagenes,  # Siempre reemplazar con el nuevo valor (aunque sea URL no-imagen)
+                        fuente,
+                        existing_id
+                    )
+                    
+                    cursor.execute(update_query, update_values)
+                    updated_count += 1
+                else:
+                    # No existe - insertar
+                    insert_query = """
+                    INSERT INTO noticias (
+                        titulo, fecha, resumen, contenido, categoria, autor, 
+                        tags, url, fecha_extraccion, caracteres_contenido, 
+                        palabras_contenido, imagenes, fuente
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    )
+                    """
+                    
+                    values = (
+                        article.get('titulo') or article.get('title') or 'Sin título',
+                        fecha,
+                        resumen[:500] if resumen else None,
+                        contenido,
+                        categoria,
+                        autor,
+                        tags,
+                        url,
+                        datetime.datetime.now(),
+                        len(contenido),
+                        len(contenido.split()) if contenido else 0,
+                        imagenes,
+                        fuente
+                    )
+                    
+                    cursor.execute(insert_query, values)
+                    inserted_count += 1
                 
             except Exception as e:
                 print(f"[scheduler] Error insertando artículo: {e}")
@@ -484,8 +530,12 @@ def import_and_insert_from_scraper(module_name: str, source_name: str) -> int:
         cursor.close()
         conn.close()
         
-        print(f"[scheduler] Insertadas {inserted_count} noticias de {source_name} en la BD")
-        return inserted_count
+        total_processed = inserted_count + updated_count
+        if updated_count > 0:
+            print(f"[scheduler] Insertadas {inserted_count} y actualizadas {updated_count} noticias de {source_name} en la BD (Total: {total_processed})")
+        else:
+            print(f"[scheduler] Insertadas {inserted_count} noticias de {source_name} en la BD")
+        return total_processed
         
     except Exception as e:
         print(f"[scheduler] ERROR importando datos de {module_name}: {e}")

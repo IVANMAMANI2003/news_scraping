@@ -18,3 +18,11 @@ feedparser==6.0.11
 # Utilidades
 python-dateutil==2.8.2
 
+# Autenticación
+bcrypt==4.1.2
+PyJWT==2.8.0
+
+# Exportación
+pyarrow==14.0.1  # Para Parquet
+lxml==4.9.3  # Para XML
+

@@ -1,0 +1,10 @@
+# Dependencias para el módulo de limpieza NLP con Ollama
+
+# Cliente HTTP para Ollama (como en el proyecto de reconocimiento)
+requests>=2.31.0
+
+# Base de datos (ya debería estar instalado)
+psycopg2-binary>=2.9.9
+
+# Utilidades
+python-dotenv>=1.0.0

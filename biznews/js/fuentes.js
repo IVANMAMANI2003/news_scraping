@@ -162,6 +162,9 @@
         const container = document.getElementById('sources-container');
         if (!container) return;
 
+        // Agregar clase row para el sistema de grid de Bootstrap
+        container.className = 'row';
+
         const cards = await Promise.all(fuentes.map(async (fuente) => {
             const fuenteName = fuente.nombre || fuente;
             const news = newsByFuente[fuenteName] || [];
@@ -180,23 +183,23 @@
             const date = latestNews ? formatDate(latestNews.fecha || latestNews.created_at) : '';
 
             return `
-                <div class="col-lg-3 col-md-6 mb-4">
+                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-4">
                     <div class="card h-100 shadow-sm">
                         <div class="position-relative">
-                            <img class="card-img-top" src="${img}" alt="${fuenteName}" style="height: 200px; object-fit: cover;">
+                            <img class="card-img-top" src="${img}" alt="${fuenteName}" style="height: 180px; object-fit: cover;">
                             <div class="position-absolute top-0 right-0 m-2">
-                                <span class="badge badge-primary">${realCount} noticias</span>
+                                <span class="badge bg-primary">${realCount} noticias</span>
                             </div>
                         </div>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title text-uppercase font-weight-bold">${fuenteName}</h5>
+                        <div class="card-body d-flex flex-column p-3">
+                            <h5 class="card-title text-uppercase fw-bold mb-2" style="font-size: 0.95rem;">${fuenteName}</h5>
                             ${latestNews ? `
-                                <p class="card-text text-muted small">Última noticia: ${date}</p>
-                                <p class="card-text">${(latestNews.titulo || '').substring(0, 100)}${(latestNews.titulo || '').length > 100 ? '...' : ''}</p>
-                            ` : '<p class="card-text text-muted">No hay noticias disponibles</p>'}
+                                <p class="card-text text-muted small mb-2" style="font-size: 0.75rem;">Última: ${date}</p>
+                                <p class="card-text small mb-2" style="font-size: 0.85rem; line-height: 1.4;">${(latestNews.titulo || '').substring(0, 80)}${(latestNews.titulo || '').length > 80 ? '...' : ''}</p>
+                            ` : '<p class="card-text text-muted small">No hay noticias disponibles</p>'}
                             <div class="mt-auto">
-                                <a href="category.html?fuente=${encodeURIComponent(fuenteName)}" class="btn btn-primary btn-block">
-                                    Ver Noticias de ${fuenteName}
+                                <a href="category.html?fuente=${encodeURIComponent(fuenteName)}" class="btn btn-primary btn-sm w-100" style="font-size: 0.8rem;">
+                                    Ver Noticias
                                 </a>
                             </div>
                         </div>
@@ -206,6 +209,18 @@
         }));
 
         container.innerHTML = cards.join('');
+        
+        // Agregar animación de entrada
+        const allCards = container.querySelectorAll('.col-xl-2, .col-lg-3, .col-md-4, .col-sm-6');
+        allCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 50);
+        });
     }
 
     function renderBreakingNews(news) {
@@ -271,6 +286,7 @@
             console.error('Error initializing fuentes page:', err);
             const container = document.getElementById('sources-container');
             if (container) {
+                container.className = 'row';
                 container.innerHTML = `
                     <div class="col-12">
                         <div class="alert alert-danger">
